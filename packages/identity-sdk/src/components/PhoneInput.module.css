@@ -1,0 +1,39 @@
+.container {
+  display: grid;
+  gap: var(--icv-space-3);
+  max-width: 24rem;
+  font-family: var(--icv-font-family);
+}
+
+.field {
+  display: grid;
+  gap: var(--icv-space-1);
+}
+
+.label {
+  font-size: var(--icv-font-size-md);
+  font-weight: var(--icv-font-weight-semibold);
+  color: var(--icv-color-text-muted);
+}
+
+.control {
+  border: 1px solid var(--icv-color-border);
+  border-radius: var(--icv-radius-md);
+  padding: var(--icv-space-2) var(--icv-space-3);
+  font-size: var(--icv-font-size-md);
+  line-height: 1.25rem;
+  background: var(--icv-color-surface);
+  color: var(--icv-color-text);
+}
+
+.control:focus {
+  outline: none;
+  border-color: var(--icv-color-focus);
+  box-shadow: var(--icv-shadow-focus);
+}
+
+.error {
+  margin: 0;
+  font-size: var(--icv-font-size-sm);
+  color: var(--icv-color-error);
+}
