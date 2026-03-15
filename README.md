@@ -82,4 +82,5 @@ Milestone 3 complete: all required SDK components are bootstrapped.
 
 - Prioritizing robust SDK boundaries and clear types first.
 - UI polish and advanced styling are intentionally deferred until core functionality is complete.
+- SDK follows a headless/composable model: host app controls step orchestration and checkout gating.
 - Engineering decision log: `docs/engineering-decisions.md`

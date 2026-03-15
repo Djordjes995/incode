@@ -12,6 +12,7 @@ function App() {
   const [selfie, setSelfie] = useState('')
   const [normalizedPhone, setNormalizedPhone] = useState('')
   const [address, setAddress] = useState<IdentityAddress | null>(null)
+  const [step, setStep] = useState<'selfie' | 'phone' | 'address' | 'result'>('selfie')
 
   const result = useMemo(() => {
     if (!selfie || !normalizedPhone || !address) {
@@ -29,13 +30,24 @@ function App() {
     <main className="app">
       <h1>SkyRent Drones</h1>
       <p>Starter SelfieCapture + PhoneInput + AddressForm integration.</p>
-      <SelfieCapture onChange={setSelfie} />
-      <PhoneInput onChange={setNormalizedPhone} />
-      <AddressForm onChange={setAddress} />
-      <p>Selfie captured: {selfie ? 'yes' : 'no'}</p>
-      <p>Normalized phone: {normalizedPhone || 'N/A'}</p>
-      <p>Address valid: {address ? 'yes' : 'no'}</p>
-      {result ? (
+      {step === 'selfie' && <>
+        <SelfieCapture onChange={setSelfie} />
+        <p>Selfie captured: {selfie ? 'yes' : 'no'}</p>
+        <button onClick={() => setStep('phone')} disabled={!selfie}>Next</button>
+      </>}
+      {step === 'phone' && <>
+        <PhoneInput onChange={setNormalizedPhone} />
+        <p>Normalized phone: {normalizedPhone || 'N/A'}</p>
+        <button onClick={() => setStep('address')} disabled={!normalizedPhone}>Next</button>
+      </>}
+      {step === 'address' && <>
+        <AddressForm onChange={setAddress} />
+        <p>Address valid: {address ? 'yes' : 'no'}</p>
+        <button onClick={() => setStep('result')} disabled={!address}>Next</button>
+      </>}
+
+
+      {step === 'result' && result ? (
         <>
           <p>Verification status: {result.status}</p>
           <p>Verification score: {result.score}</p>

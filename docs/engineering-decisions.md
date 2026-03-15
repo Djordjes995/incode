@@ -48,3 +48,25 @@ Decision:
 
 Why this decision:
 - Ensures all mandatory flows are complete and testable before aesthetic enhancements.
+
+## 5) SDK Orchestration Model (Headless)
+
+Decision:
+- Keep the SDK headless/composable: expose `SelfieCapture`, `PhoneInput`, `AddressForm`, and `getIdentityData`, while orchestration stays in the host app.
+
+Why this decision:
+- Maximizes integration flexibility across host apps with different UX flows.
+- Makes each SDK component independently reusable and testable.
+- Aligns with assignment intent: demonstrate SDK design plus host-app integration.
+
+How it behaves:
+- SDK components own capture and validation for their own data domain.
+- Host app owns step flow, navigation, retry rules, and checkout gating.
+- `getIdentityData` consumes collected values and returns score + status.
+
+Tradeoff:
+- Integration cost is slightly higher because host apps must wire step sequencing.
+
+Mitigation:
+- Clear integration examples and typed contracts reduce wiring mistakes.
+- Future optional wrapper can provide a prebuilt wizard for teams that prefer low-code integration.
