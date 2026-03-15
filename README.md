@@ -51,7 +51,7 @@ pnpm lint
 
 - [x] Monorepo/package foundation
 - [x] SDK package in library mode (exports/types)
-- [ ] SelfieCapture component
+- [x] SelfieCapture component
 - [x] PhoneInput component with E.164 normalization
 - [x] AddressForm component
 - [x] getIdentityData implementation
@@ -66,16 +66,17 @@ pnpm lint
 
 ## Current Status
 
-Milestone 2 complete: SDK core contract + minimal form components.
+Milestone 3 complete: all required SDK components are bootstrapped.
 
-- `getIdentityData` and score logic are implemented.
+- `SelfieCapture` starter flow is implemented (camera access, capture, preview, retake, basic errors).
 - `PhoneInput` and `AddressForm` are integrated with basic validation.
-- Shared SDK style tokens are in place for consistent component styling.
+- Demo app now composes all three SDK components before generating verification results.
 
 ## Milestones Log
 
 - Milestone 1: Monorepo + SDK library scaffolding + app integration wiring.
 - Milestone 2: SDK core logic + minimal PhoneInput and AddressForm integration.
+- Milestone 3: SelfieCapture starter integration and full SDK data collection flow.
 
 ## Notes / Tradeoffs
 

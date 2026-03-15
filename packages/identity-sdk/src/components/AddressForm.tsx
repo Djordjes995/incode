@@ -15,6 +15,7 @@ const DEFAULT_ADDRESS: IdentityAddress = {
   country: "",
   postalCode: "",
 };
+
 export function AddressForm({ value = DEFAULT_ADDRESS, onChange }: AddressFormProps) {
   const streetId = useId();
   const cityId = useId();
