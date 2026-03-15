@@ -1,25 +1,42 @@
 import './App.css'
-import { getIdentityData } from '@incode/identity-sdk'
+import { useMemo, useState } from 'react'
+import {
+  AddressForm,
+  PhoneInput,
+  getIdentityData,
+  type IdentityAddress,
+} from '@incode/identity-sdk'
 
 function App() {
-  const result = getIdentityData({
-    selfieUrl: 'data:image/png;base64,mock-selfie',
-    phone: '+14155552671',
-    address: {
-      street: '123 Main Street',
-      city: 'San Francisco',
-      state: 'California',
-      country: 'United States',
-      postalCode: '94102',
-    },
-  })
+  const [normalizedPhone, setNormalizedPhone] = useState('')
+  const [address, setAddress] = useState<IdentityAddress | null>(null)
+
+  const result = useMemo(() => {
+    if (!normalizedPhone || !address) {
+      return null
+    }
+
+    return getIdentityData({
+      selfieUrl: 'data:image/png;base64,mock-selfie',
+      phone: normalizedPhone,
+      address,
+    })
+  }, [address, normalizedPhone])
 
   return (
     <main className="app">
       <h1>SkyRent Drones</h1>
-      <p>SDK core contract wired.</p>
-      <p>Verification status: {result.status}</p>
-      <p>Verification score: {result.score}</p>
+      <p>Minimal PhoneInput + AddressForm integration.</p>
+      <PhoneInput onChange={setNormalizedPhone} />
+      <AddressForm onChange={setAddress} />
+      <p>Normalized phone: {normalizedPhone || 'N/A'}</p>
+      <p>Address valid: {address ? 'yes' : 'no'}</p>
+      {result ? (
+        <>
+          <p>Verification status: {result.status}</p>
+          <p>Verification score: {result.score}</p>
+        </>
+      ) : null}
     </main>
   )
 }

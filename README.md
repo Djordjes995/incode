@@ -52,10 +52,10 @@ pnpm lint
 - [x] Monorepo/package foundation
 - [x] SDK package in library mode (exports/types)
 - [ ] SelfieCapture component
-- [ ] PhoneInput component with E.164 normalization
-- [ ] AddressForm component
-- [ ] getIdentityData implementation
-- [ ] Verification scoring logic (30% fail, 70% pass)
+- [x] PhoneInput component with E.164 normalization
+- [x] AddressForm component
+- [x] getIdentityData implementation
+- [x] Verification scoring logic (30% fail, 70% pass)
 
 ### SkyRent Demo App
 
@@ -66,17 +66,19 @@ pnpm lint
 
 ## Current Status
 
-Milestone 1 complete: workspace and SDK/app integration foundation.
+Milestone 2 complete: SDK core contract + minimal form components.
 
-- Demo app imports the SDK from the workspace.
-- SDK builds as a typed library output.
-- Root scripts validate build, typecheck, and lint.
+- `getIdentityData` and score logic are implemented.
+- `PhoneInput` and `AddressForm` are integrated with basic validation.
+- Shared SDK style tokens are in place for consistent component styling.
 
 ## Milestones Log
 
 - Milestone 1: Monorepo + SDK library scaffolding + app integration wiring.
+- Milestone 2: SDK core logic + minimal PhoneInput and AddressForm integration.
 
 ## Notes / Tradeoffs
 
 - Prioritizing robust SDK boundaries and clear types first.
 - UI polish and advanced styling are intentionally deferred until core functionality is complete.
+- Engineering decision log: `docs/engineering-decisions.md`
