@@ -4,10 +4,10 @@ import "../styles/tokens.css";
 import styles from "./PhoneInput.module.css";
 
 const COUNTRY_OPTIONS: Array<{ code: CountryCode; label: string; dialCode: string }> = [
+  { code: "RS", label: "Serbia (+381)", dialCode: "+381" },
   { code: "US", label: "United States (+1)", dialCode: "+1" },
   { code: "CA", label: "Canada (+1)", dialCode: "+1" },
   { code: "MX", label: "Mexico (+52)", dialCode: "+52" },
-  { code: "RS", label: "Serbia (+381)", dialCode: "+381" },
 ];
 
 export interface PhoneInputProps {
