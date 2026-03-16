@@ -109,6 +109,17 @@ function App() {
     })
   }
 
+  const removeCartItem = (index: number) => {
+    setSelectedCartItems((current) => current.filter((_, i) => i !== index))
+  }
+
+  const updateCartItemDays = (index: number, days: number) => {
+    const safeDays = Math.min(MAX_RENTAL_DAYS, Math.max(1, days))
+    setSelectedCartItems((current) =>
+      current.map((item, i) => (i === index ? { ...item, rentalDays: safeDays } : item)),
+    )
+  }
+
   const cartTotal = selectedCartItems.reduce(
     (total, item) => total + item.pricePerDay * item.rentalDays,
     0,
@@ -128,6 +139,8 @@ function App() {
             cargoDrones={cargoDrones}
             selectedCartItems={selectedCartItems}
             onAddDrone={addDroneToCart}
+            onRemoveCartItem={removeCartItem}
+            onUpdateCartItemDays={updateCartItemDays}
           />
         ) : null}
         {step === 'selfie' && <>

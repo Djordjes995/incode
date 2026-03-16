@@ -8,13 +8,39 @@ interface DroneCardProps {
   onAddToCart: () => void
 }
 
+type DroneCategory = DroneItem['category']
+
+const CATEGORY_LABELS: Record<DroneCategory, string> = {
+  filming: 'Filming',
+  cargo: 'Cargo',
+}
+
+const CATEGORY_META_FORMATTERS: {
+  [K in DroneCategory]: (drone: Extract<DroneItem, { category: K }>) => string
+} = {
+  filming: (drone) => drone.cameraQuality,
+  cargo: (drone) => `${drone.loadCapacityKg}kg load capacity`,
+}
+
+function getDroneMeta(drone: DroneItem): string {
+  switch (drone.category) {
+    case 'filming':
+      return CATEGORY_META_FORMATTERS.filming(drone)
+    case 'cargo':
+      return CATEGORY_META_FORMATTERS.cargo(drone)
+  }
+}
+
 export function DroneCard({ drone, rentalDays, onDaysChange, onAddToCart }: DroneCardProps) {
+  const categoryLabel = CATEGORY_LABELS[drone.category]
+  const droneMeta = getDroneMeta(drone)
+
   return (
     <article className={styles.card}>
       <div className={styles.imageWrapper}>
         <img className={styles.droneImage} src={drone.imageUrl} alt={drone.name} />
         <span className={styles.categoryLabel}>
-          {drone.category === 'cargo' ? 'Cargo' : 'Filming'}
+          {categoryLabel}
         </span>
       </div>
       <div>
@@ -22,7 +48,7 @@ export function DroneCard({ drone, rentalDays, onDaysChange, onAddToCart }: Dron
           <h3 className={styles.itemName}>{drone.name}</h3>
           <p className={styles.description}>{drone.description}</p>
           <p className={styles.itemMeta}>
-            {drone.category === 'cargo' ? `${drone.loadCapacityKg}kg load capacity` : drone.cameraQuality}
+            {droneMeta}
             {' '} · ${drone.pricePerDay}/day
           </p>
         </div>

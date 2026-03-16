@@ -18,11 +18,11 @@
   --sr-color-text: #0f172a;
   --sr-color-muted: #475569;
   --sr-color-border: #dbe3ee;
-  --sr-color-primary: #2563eb;
+  --sr-color-primary: #334155;
   --sr-color-success: #16a34a;
   --sr-color-danger: #dc2626;
 
   --sr-radius-md: 0.5rem;
   --sr-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
-  --sr-shadow-focus: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  --sr-shadow-focus: 0 0 0 3px rgba(51, 65, 85, 0.2);
 }

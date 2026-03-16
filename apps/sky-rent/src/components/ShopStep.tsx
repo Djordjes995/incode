@@ -8,6 +8,8 @@ interface ShopStepProps {
   cargoDrones: CargoDroneItem[]
   selectedCartItems: CartItem[]
   onAddDrone: (drone: DroneItem, rentalDays: number) => void
+  onRemoveCartItem: (index: number) => void
+  onUpdateCartItemDays: (index: number, rentalDays: number) => void
 }
 
 type CategoryFilter = 'all' | 'filming' | 'cargo'
@@ -17,6 +19,8 @@ export function ShopStep({
   cargoDrones,
   selectedCartItems,
   onAddDrone,
+  onRemoveCartItem,
+  onUpdateCartItemDays,
 }: ShopStepProps) {
   const [rentalDaysByDroneId, setRentalDaysByDroneId] = useState<Record<number, number>>({});
   const [activeFilter, setActiveFilter] = useState<CategoryFilter>('all');
@@ -75,9 +79,32 @@ export function ShopStep({
           <p className={styles.selectedCount}>Selected items: {selectedCartItems.length}</p>
           {selectedCartItems.length > 0 ? (
             <ul className={styles.cartList}>
-              {selectedCartItems.map((item) => (
-                <li key={`${item.id}-shop`}>
-                  {item.name} x {item.rentalDays} day - ${item.pricePerDay * item.rentalDays}
+              {selectedCartItems.map((item, index) => (
+                <li key={`${item.id}-${index}`} className={styles.cartItem}>
+                  <span className={styles.cartItemName}>{item.name}</span>
+                  <label className={styles.daysControl}>
+                    <span>Days</span>
+                    <input
+                      type="number"
+                      min={1}
+                      max={30}
+                      value={item.rentalDays}
+                      onChange={(e) => {
+                        const v = Number.parseInt(e.target.value, 10)
+                        if (Number.isFinite(v)) onUpdateCartItemDays(index, v)
+                      }}
+                      aria-label={`Rental days for ${item.name}`}
+                    />
+                  </label>
+                  <span className={styles.cartItemPrice}>${item.pricePerDay * item.rentalDays}</span>
+                  <button
+                    type="button"
+                    className={styles.removeButton}
+                    onClick={() => onRemoveCartItem(index)}
+                    aria-label={`Remove ${item.name} from cart`}
+                  >
+                    Remove
+                  </button>
                 </li>
               ))}
             </ul>

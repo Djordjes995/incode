@@ -66,7 +66,7 @@
   width: 5rem;
   border: 1px solid var(--sr-color-border);
   border-radius: var(--sr-radius-md);
-  padding: var(--sr-space-1) var(--sr-space-2);
+  padding: var(--sr-space-2) var(--sr-space-4);
 }
 
 .daysInput:focus-visible {
@@ -76,9 +76,20 @@
 }
 
 .button {
-  border: 1px solid var(--sr-color-border);
+  border: none;
   border-radius: var(--sr-radius-md);
-  padding: var(--sr-space-1) var(--sr-space-2);
-  background: var(--sr-color-surface);
+  padding: var(--sr-space-2) var(--sr-space-4);
+  background: var(--sr-color-primary);
+  color: white;
+  font-weight: 500;
   cursor: pointer;
+}
+
+.button:hover {
+  filter: brightness(1.05);
+}
+
+.button:focus-visible {
+  outline: none;
+  box-shadow: var(--sr-shadow-focus);
 }
