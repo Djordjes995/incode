@@ -8,68 +8,74 @@
   color: var(--sr-color-muted);
 }
 
-.category {
-  margin: 0;
-  font-size: var(--sr-font-size-lg);
-}
-
-.list {
-  margin: 0;
-  padding-left: 1.2rem;
-  display: grid;
-  gap: var(--sr-space-2);
-}
-
-.item {
-  display: grid;
-  gap: var(--sr-space-2);
-  background: var(--sr-color-surface);
-  border: 1px solid var(--sr-color-border);
-  border-radius: var(--sr-radius-md);
-  padding: var(--sr-space-3);
-}
-
-.droneImage {
-  width: 100%;
-  max-width: 20rem;
-  aspect-ratio: 16 / 10;
-  object-fit: cover;
-  border-radius: var(--sr-radius-md);
-  border: 1px solid var(--sr-color-border);
-}
-
-.itemMeta {
-  margin: 0;
-}
-
-.row {
+.filterRow {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--sr-space-2);
   flex-wrap: wrap;
 }
 
-.label {
+.filterButtons {
+  display: flex;
+  gap: var(--sr-space-2);
+  flex-wrap: wrap;
+}
+
+.selectedCart {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--sr-space-2);
+  text-align: right;
+}
+
+.selectedCount {
+  margin: 0;
   font-size: var(--sr-font-size-sm);
+  color: var(--sr-color-muted);
 }
 
-.daysInput {
-  width: 5rem;
-  border: 1px solid var(--sr-color-border);
-  border-radius: var(--sr-radius-md);
-  padding: var(--sr-space-1) var(--sr-space-2);
-}
-
-.daysInput:focus-visible {
-  outline: none;
-  border-color: var(--sr-color-primary);
-  box-shadow: var(--sr-shadow-focus);
-}
-
-.button {
+.filterButton {
   border: 1px solid var(--sr-color-border);
   border-radius: var(--sr-radius-md);
   padding: var(--sr-space-1) var(--sr-space-2);
   background: var(--sr-color-surface);
   cursor: pointer;
+}
+
+.filterButton[data-active='true'] {
+  border-color: var(--sr-color-primary);
+  color: var(--sr-color-primary);
+}
+
+.category {
+  margin: 0;
+  font-size: var(--sr-font-size-lg);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sr-space-3);
+}
+
+@media (max-width: 980px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cartList {
+  margin: 0;
+  padding-right: 1.2rem;
+  display: grid;
+  gap: var(--sr-space-2);
+  list-style-position: inside;
 }

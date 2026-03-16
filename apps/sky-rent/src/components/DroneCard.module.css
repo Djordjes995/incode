@@ -1,0 +1,84 @@
+.card {
+  display: grid;
+  gap: var(--sr-space-2);
+  background: var(--sr-color-surface);
+  border: 1px solid var(--sr-color-border);
+  border-radius: var(--sr-radius-md);
+}
+
+.cardContent {
+  padding: var(--sr-space-4);
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  gap: var(--sr-space-2);
+  padding: var(--sr-space-4) var(--sr-space-2);
+  margin: 0 var(--sr-space-2);
+  border-top: 1px solid var(--sr-color-border);
+}
+
+.imageWrapper {
+  position: relative;
+  margin-top: var(--sr-space-6);
+}
+
+.droneImage {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+.categoryLabel {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  padding: var(--sr-space-1) var(--sr-space-2);
+  font-size: var(--sr-font-size-sm);
+  font-weight: 500;
+  color: var(--sr-color-surface);
+  background: rgba(15, 23, 42, 0.7);
+  border-radius: var(--sr-radius-md);
+}
+
+.itemName {
+  margin: 0;
+  font-size: var(--sr-font-size-lg);
+}
+
+.itemMeta {
+  margin: var(--sr-space-1) 0 0;
+}
+
+.description {
+  margin: var(--sr-space-1) 0 0;
+  font-size: var(--sr-font-size-sm);
+  color: var(--sr-color-text-muted, #666);
+  line-height: 1.4;
+}
+
+.label {
+  font-size: var(--sr-font-size-sm);
+}
+
+.daysInput {
+  width: 5rem;
+  border: 1px solid var(--sr-color-border);
+  border-radius: var(--sr-radius-md);
+  padding: var(--sr-space-1) var(--sr-space-2);
+}
+
+.daysInput:focus-visible {
+  outline: none;
+  border-color: var(--sr-color-primary);
+  box-shadow: var(--sr-shadow-focus);
+}
+
+.button {
+  border: 1px solid var(--sr-color-border);
+  border-radius: var(--sr-radius-md);
+  padding: var(--sr-space-1) var(--sr-space-2);
+  background: var(--sr-color-surface);
+  cursor: pointer;
+}

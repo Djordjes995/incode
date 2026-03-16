@@ -1,31 +1,7 @@
 import { useState } from 'react'
+import { DroneCard } from './DroneCard'
 import styles from './ShopStep.module.css'
-
-export interface BaseDroneItem {
-  id: number
-  name: string
-  pricePerDay: number
-  imageUrl: string
-}
-
-export interface FilmingDroneItem extends BaseDroneItem {
-  category: 'filming'
-  cameraQuality: string
-}
-
-export interface CargoDroneItem extends BaseDroneItem {
-  category: 'cargo'
-  loadCapacityKg: number
-}
-
-export type DroneItem = FilmingDroneItem | CargoDroneItem
-
-export interface CartItem extends BaseDroneItem {
-  category: 'filming' | 'cargo'
-  rentalDays: number
-  loadCapacityKg?: number
-  cameraQuality?: string
-}
+import type { CargoDroneItem, CartItem, DroneItem, FilmingDroneItem } from './shopTypes'
 
 interface ShopStepProps {
   filmingDrones: FilmingDroneItem[]
@@ -34,6 +10,8 @@ interface ShopStepProps {
   onAddDrone: (drone: DroneItem, rentalDays: number) => void
 }
 
+type CategoryFilter = 'all' | 'filming' | 'cargo'
+
 export function ShopStep({
   filmingDrones,
   cargoDrones,
@@ -41,6 +19,7 @@ export function ShopStep({
   onAddDrone,
 }: ShopStepProps) {
   const [rentalDaysByDroneId, setRentalDaysByDroneId] = useState<Record<number, number>>({});
+  const [activeFilter, setActiveFilter] = useState<CategoryFilter>('all');
 
   const getDays = (droneId: number) => rentalDaysByDroneId[droneId] ?? 1;
 
@@ -53,73 +32,70 @@ export function ShopStep({
     }));
   };
 
+  const filteredDrones: DroneItem[] =
+    activeFilter === 'all'
+      ? [...filmingDrones, ...cargoDrones]
+      : activeFilter === 'filming'
+        ? filmingDrones
+        : cargoDrones;
+
   return (
     <section className={styles.section}>
       <h2>Browse and Select Drones</h2>
       <p className={styles.description}>Select at least one drone to continue.</p>
 
-      <h3 className={styles.category}>Filming Drones</h3>
-      <ul className={styles.list}>
-        {filmingDrones.map((drone) => (
-          <li className={styles.item} key={drone.id}>
-            <img className={styles.droneImage} src={drone.imageUrl} alt={drone.name} />
-            <p className={styles.itemMeta}>
-              {drone.name} - {drone.cameraQuality} - ${drone.pricePerDay}/day
-            </p>
-            <div className={styles.row}>
-              <label className={styles.label}>
-                Days:
-              </label>
-              <input
-                className={styles.daysInput}
-                min={1}
-                max={30}
-                type='number'
-                value={getDays(drone.id)}
-                onChange={(event) => updateDays(drone.id, event.target.value)}
-              />
-              <button className={styles.button} onClick={() => onAddDrone(drone, getDays(drone.id))} type='button'>Add to cart</button>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <div className={styles.filterRow}>
+        <div className={styles.filterButtons}>
+          <button
+            className={styles.filterButton}
+            data-active={activeFilter === 'all'}
+            onClick={() => setActiveFilter('all')}
+            type='button'
+          >
+            All
+          </button>
+          <button
+            className={styles.filterButton}
+            data-active={activeFilter === 'filming'}
+            onClick={() => setActiveFilter('filming')}
+            type='button'
+          >
+            Filming
+          </button>
+          <button
+            className={styles.filterButton}
+            data-active={activeFilter === 'cargo'}
+            onClick={() => setActiveFilter('cargo')}
+            type='button'
+          >
+            Cargo
+          </button>
+        </div>
+        <div className={styles.selectedCart}>
+          <p className={styles.selectedCount}>Selected items: {selectedCartItems.length}</p>
+          {selectedCartItems.length > 0 ? (
+            <ul className={styles.cartList}>
+              {selectedCartItems.map((item) => (
+                <li key={`${item.id}-shop`}>
+                  {item.name} x {item.rentalDays} day - ${item.pricePerDay * item.rentalDays}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      </div>
 
-      <h3 className={styles.category}>Cargo Drones</h3>
-      <ul className={styles.list}>
-        {cargoDrones.map((drone) => (
-          <li className={styles.item} key={drone.id}>
-            <img className={styles.droneImage} src={drone.imageUrl} alt={drone.name} />
-            <p className={styles.itemMeta}>
-              {drone.name} - {drone.loadCapacityKg}kg load capacity - ${drone.pricePerDay}/day
-            </p>
-            <div className={styles.row}>
-              <label className={styles.label}>
-                Days:
-              </label>
-              <input
-                className={styles.daysInput}
-                min={1}
-                max={30}
-                type='number'
-                value={getDays(drone.id)}
-                onChange={(event) => updateDays(drone.id, event.target.value)}
-              />
-              <button className={styles.button} onClick={() => onAddDrone(drone, getDays(drone.id))} type='button'>Add to cart</button>
-            </div>
-          </li>
+      <div className={styles.grid}>
+        {filteredDrones.map((drone) => (
+          <DroneCard
+            key={drone.id}
+            drone={drone}
+            rentalDays={getDays(drone.id)}
+            onDaysChange={(nextValue) => updateDays(drone.id, nextValue)}
+            onAddToCart={() => onAddDrone(drone, getDays(drone.id))}
+          />
         ))}
-      </ul>
-
-      <p>Selected items: {selectedCartItems.length}</p>
-      {selectedCartItems.length > 0 ? (
-        <ul>
-          {selectedCartItems.map((item, index) => (
-            <li key={`${item.id}-${index}`}>
-              {item.name} x {item.rentalDays} day - ${item.pricePerDay * item.rentalDays}
-            </li>
-          ))}
-        </ul>
-      ) : null}
+      </div>
     </section>
   )
 }

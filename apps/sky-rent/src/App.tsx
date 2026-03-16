@@ -1,11 +1,7 @@
 import { useMemo, useState } from 'react'
-import {
-  ShopStep,
-  type CartItem,
-  type CargoDroneItem,
-  type DroneItem,
-  type FilmingDroneItem,
-} from './components/ShopStep'
+import { droneInventory } from './data/droneInventory'
+import { ShopStep } from './components/ShopStep'
+import type { CargoDroneItem, CartItem, DroneItem, FilmingDroneItem } from './components/shopTypes'
 import {
   AddressForm,
   PhoneInput,
@@ -18,47 +14,13 @@ import styles from './App.module.css'
 type AppStep = 'shop' | 'selfie' | 'phone' | 'address' | 'result' | 'checkout'
 const appSteps: AppStep[] = ['shop', 'selfie', 'phone', 'address', 'result', 'checkout']
 
-const droneInventory: DroneItem[] = [
-  {
-    id: 1,
-    name: 'CineView Pro',
-    pricePerDay: 100,
-    imageUrl: '/images/drones/filming-cineview-pro.jpg',
-    category: 'filming',
-    cameraQuality: '4K',
-  },
-  {
-    id: 2,
-    name: 'StudioAir X',
-    pricePerDay: 180,
-    imageUrl: '/images/drones/filming-studioair-x.jpg',
-    category: 'filming',
-    cameraQuality: '6K',
-  },
-  {
-    id: 3,
-    name: 'CargoLift C1',
-    pricePerDay: 200,
-    imageUrl: '/images/drones/cargo-cargolift-c1.jpg',
-    category: 'cargo',
-    loadCapacityKg: 20,
-  },
-  {
-    id: 4,
-    name: 'HeavyHaul H2',
-    pricePerDay: 320,
-    imageUrl: '/images/drones/cargo-heavyhaul-h2.jpg',
-    category: 'cargo',
-    loadCapacityKg: 45,
-  },
-]
-
 const filmingDrones = droneInventory.filter(
   (drone): drone is FilmingDroneItem => drone.category === 'filming',
 );
 const cargoDrones = droneInventory.filter(
   (drone): drone is CargoDroneItem => drone.category === 'cargo',
 );
+const MAX_RENTAL_DAYS = 30;
 
 function App() {
   const [selfie, setSelfie] = useState('')
@@ -119,20 +81,32 @@ function App() {
   }
 
   const addDroneToCart = (drone: DroneItem, rentalDays: number) => {
-    setSelectedCartItems((current) => [
-      ...current,
-      {
-        id: drone.id,
-        name: drone.name,
-        category: drone.category,
-        pricePerDay: drone.pricePerDay,
-        imageUrl: drone.imageUrl,
-        rentalDays,
-        ...(drone.category === 'cargo'
-          ? { loadCapacityKg: drone.loadCapacityKg }
-          : { cameraQuality: drone.cameraQuality }),
-      },
-    ])
+    setSelectedCartItems((current) => {
+      const existingIndex = current.findIndex((item) => item.id === drone.id);
+      if (existingIndex >= 0) {
+        return current.map((item, index) =>
+          index === existingIndex
+            ? { ...item, rentalDays: Math.min(MAX_RENTAL_DAYS, item.rentalDays + rentalDays) }
+            : item,
+        );
+      }
+
+      return [
+        ...current,
+        {
+          id: drone.id,
+          name: drone.name,
+          description: drone.description,
+          category: drone.category,
+          pricePerDay: drone.pricePerDay,
+          imageUrl: drone.imageUrl,
+          rentalDays,
+          ...(drone.category === 'cargo'
+            ? { loadCapacityKg: drone.loadCapacityKg }
+            : { cameraQuality: drone.cameraQuality }),
+        },
+      ];
+    })
   }
 
   const cartTotal = selectedCartItems.reduce(
@@ -204,8 +178,8 @@ function App() {
             <p>Cart items: {selectedCartItems.length}</p>
             {selectedCartItems.length > 0 ? (
               <ul>
-                {selectedCartItems.map((item, index) => (
-                  <li key={`${item.id}-checkout-${index}`}>
+                {selectedCartItems.map((item) => (
+                  <li key={`${item.id}-checkout`}>
                     {item.name} x {item.rentalDays} day - ${item.pricePerDay * item.rentalDays}
                   </li>
                 ))}
