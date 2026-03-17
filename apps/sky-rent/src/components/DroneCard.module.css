@@ -4,6 +4,11 @@
   background: var(--sr-color-surface);
   border: 1px solid var(--sr-color-border);
   border-radius: var(--sr-radius-md);
+  transition: all 0.2s;
+}
+
+.card:hover {
+  box-shadow: var(--sr-shadow-md);
 }
 
 .cardContent {
