@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { droneInventory } from './data/droneInventory'
 import { ShopStep } from './components/ShopStep'
+import { OrderSummary } from './components/OrderSummary'
 import type { CargoDroneItem, CartItem, DroneItem, FilmingDroneItem } from './components/shopTypes'
 import {
   AddressForm,
@@ -124,15 +125,16 @@ function App() {
     (total, item) => total + item.pricePerDay * item.rentalDays,
     0,
   )
+  const showSummary = step !== 'shop'
+  const currentStepNumber = appSteps.indexOf(step) + 1
 
   return (
     <main className={styles.page}>
       <header className={styles.header}>
         <h1 className={styles.title}>SkyRent Drones</h1>
         <p className={styles.subtitle}>Identity verification demo with reusable SDK components.</p>
+        <p className={styles.progress}>Step {currentStepNumber} of {appSteps.length}</p>
       </header>
-
-      <p className={styles.status}>Current step: {step}</p>
 
       <div className={styles.actions}>
         <button className={styles.button} onClick={goBack} disabled={step === 'shop'} type='button'>Back</button>
@@ -141,84 +143,123 @@ function App() {
         ) : null}
       </div>
 
-      <section className={styles.panel}>
-        {step === 'shop' ? (
-          <ShopStep
-            filmingDrones={filmingDrones}
-            cargoDrones={cargoDrones}
-            selectedCartItems={selectedCartItems}
-            onAddDrone={addDroneToCart}
-            onRemoveCartItem={removeCartItem}
-            onUpdateCartItemDays={updateCartItemDays}
-          />
-        ) : null}
-        {step === 'selfie' && <>
-          <SelfieCapture onChange={setSelfie} value={selfie} />
-          <p className={styles.status}>Selfie captured: {selfie ? 'yes' : 'no'}</p>
-        </>}
-        {step === 'phone' && <>
-          <PhoneInput onChange={setNormalizedPhone} value={normalizedPhone} />
-          <p className={styles.status}>Normalized phone: {normalizedPhone || 'N/A'}</p>
-        </>}
-        {step === 'address' && <>
-          <AddressForm onChange={setAddress} value={address ?? undefined} />
-          <p className={styles.status}>Address valid: {address ? 'yes' : 'no'}</p>
-        </>}
-
-        {step === 'result' && result ? (
-          <>
-            <img className={styles.imagePreview} src={result.selfieUrl} alt='selfie' />
-            <div>Phone: {result.phone}</div>
-            <div>
-              Address:
-              <div>
-                Street: {result.address.street}<br />
-                City: {result.address.city}<br />
-                State: {result.address.state}<br />
-                Country: {result.address.country}<br />
-                Postal Code: {result.address.postalCode}<br />
+      <div
+        className={`${styles.contentLayout} ${!showSummary ? styles.contentLayoutSingle : ''}`}
+      >
+        <section className={styles.panel}>
+          {step === 'shop' ? (
+            <ShopStep
+              filmingDrones={filmingDrones}
+              cargoDrones={cargoDrones}
+              selectedCartItems={selectedCartItems}
+              onAddDrone={addDroneToCart}
+              onRemoveCartItem={removeCartItem}
+              onUpdateCartItemDays={updateCartItemDays}
+            />
+          ) : null}
+          {step === 'selfie' && (
+            <div className={styles.stepSection}>
+              <div className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitle}>Selfie Capture</h3>
+                <p className={styles.sectionSubtitle}>
+                  Take a clear photo of your face for identity verification.
+                </p>
+              </div>
+              <div className={styles.sectionContent}>
+                <SelfieCapture onChange={setSelfie} value={selfie} />
               </div>
             </div>
-            <p>Verification status: {result.status}</p>
-            <p>Verification score: {result.score}</p>
-            {result.status === 'failed' ? (
-              <>
-                <p className={styles.error}>Verification failed. Please retry or stop checkout.</p>
-                <button className={styles.button} onClick={retryVerification} type='button'>Retry verification</button>
-              </>
-            ) : (
-              <>
-                <p className={styles.success}>Verification succeeded. You can proceed to checkout.</p>
-                <button className={styles.primaryButton} onClick={proceedToCheckout} type='button'>Proceed to checkout</button>
-              </>
-            )}
-          </>
+          )}
+          {step === 'phone' && (
+            <div className={styles.stepSection}>
+              <div className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitle}>Phone Verification</h3>
+                <p className={styles.sectionSubtitle}>
+                  Enter your phone number so we can validate your contact details.
+                </p>
+              </div>
+              <div className={styles.sectionContent}>
+                <PhoneInput onChange={setNormalizedPhone} value={normalizedPhone} />
+              </div>
+            </div>
+          )}
+          {step === 'address' && (
+            <div className={styles.stepSection}>
+              <div className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitle}>Address Verification</h3>
+                <p className={styles.sectionSubtitle}>
+                  Provide your current address to complete identity checks.
+                </p>
+              </div>
+              <div className={styles.sectionContent}>
+                <AddressForm onChange={setAddress} value={address ?? undefined} />
+              </div>
+            </div>
+          )}
+
+          {step === 'result' && result ? (
+            <>
+              <img className={styles.imagePreview} src={result.selfieUrl} alt='selfie' />
+              <div>Phone: {result.phone}</div>
+              <div>
+                Address:
+                <div>
+                  Street: {result.address.street}<br />
+                  City: {result.address.city}<br />
+                  State: {result.address.state}<br />
+                  Country: {result.address.country}<br />
+                  Postal Code: {result.address.postalCode}<br />
+                </div>
+              </div>
+              <p>Verification status: {result.status}</p>
+              <p>Verification score: {result.score}</p>
+              {result.status === 'failed' ? (
+                <>
+                  <p className={styles.error}>Verification failed. Please retry or stop checkout.</p>
+                  <button className={styles.button} onClick={retryVerification} type='button'>Retry verification</button>
+                </>
+              ) : (
+                <>
+                  <p className={styles.success}>Verification succeeded. You can proceed to checkout.</p>
+                  <button className={styles.primaryButton} onClick={proceedToCheckout} type='button'>Proceed to checkout</button>
+                </>
+              )}
+            </>
+          ) : null}
+          {step === 'checkout' && result ? (
+            <>
+              <h2>Checkout</h2>
+              <p>Cart items: {selectedCartItems.length}</p>
+              {selectedCartItems.length > 0 ? (
+                <ul>
+                  {selectedCartItems.map((item) => (
+                    <li key={`${item.id}-checkout`}>
+                      {item.name} x {item.rentalDays} day - ${item.pricePerDay * item.rentalDays}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              <p>Total: ${cartTotal}</p>
+              <p>Identity status: {result.status}</p>
+              <p>Phone: {result.phone}</p>
+              <p>
+                Address: {result.address.street}, {result.address.city}, {result.address.state},{' '}
+                {result.address.country}, {result.address.postalCode}
+              </p>
+              <button className={styles.primaryButton} onClick={() => setRentalCompleted(true)} type='button'>Complete Rental</button>
+              {rentalCompleted ? <p className={styles.success}>Rental completed successfully.</p> : null}
+            </>
+          ) : null}
+        </section>
+
+        {showSummary ? (
+          <OrderSummary
+            items={selectedCartItems}
+            total={cartTotal}
+            stepLabel={step}
+          />
         ) : null}
-        {step === 'checkout' && result ? (
-          <>
-            <h2>Checkout</h2>
-            <p>Cart items: {selectedCartItems.length}</p>
-            {selectedCartItems.length > 0 ? (
-              <ul>
-                {selectedCartItems.map((item) => (
-                  <li key={`${item.id}-checkout`}>
-                    {item.name} x {item.rentalDays} day - ${item.pricePerDay * item.rentalDays}
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-            <p>Total: ${cartTotal}</p>
-            <p>Identity status: {result.status}</p>
-            <p>Phone: {result.phone}</p>
-            <p>
-              Address: {result.address.street}, {result.address.city}, {result.address.state},{' '}
-              {result.address.country}, {result.address.postalCode}
-            </p>
-            <button className={styles.primaryButton} onClick={() => setRentalCompleted(true)} type='button'>Complete Rental</button>
-            {rentalCompleted ? <p className={styles.success}>Rental completed successfully.</p> : null}
-          </>
-        ) : null}
-      </section>
+      </div>
 
 
     </main>

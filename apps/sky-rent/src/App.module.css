@@ -21,6 +21,12 @@
   color: var(--sr-color-muted);
 }
 
+.progress {
+  margin: 0;
+  font-size: var(--sr-font-size-sm);
+  color: var(--sr-color-muted);
+}
+
 .panel {
   background: var(--sr-color-surface);
   border: 1px solid var(--sr-color-border);
@@ -29,6 +35,17 @@
   padding: var(--sr-space-4);
   display: grid;
   gap: var(--sr-space-3);
+}
+
+.contentLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 18rem;
+  gap: var(--sr-space-3);
+  align-items: start;
+}
+
+.contentLayoutSingle {
+  grid-template-columns: 1fr;
 }
 
 .status {
@@ -88,4 +105,38 @@
   outline: none;
   border-color: var(--sr-color-primary);
   box-shadow: var(--sr-shadow-focus);
+}
+
+.sectionTitle {
+  font-size: var(--sr-font-size-lg);
+  font-weight: 500;
+  margin: 0;
+}
+
+.sectionSubtitle {
+  font-size: var(--sr-font-size-sm);
+  color: var(--sr-color-muted);
+  margin: 0;
+}
+
+.stepSection {
+  display: grid;
+  gap: var(--sr-space-3);
+}
+
+.sectionHeader {
+  display: grid;
+  gap: var(--sr-space-1);
+}
+
+.sectionContent {
+  margin-top: var(--sr-space-4);
+  display: grid;
+  gap: var(--sr-space-2);
+}
+
+@media (max-width: 980px) {
+  .contentLayout {
+    grid-template-columns: 1fr;
+  }
 }
