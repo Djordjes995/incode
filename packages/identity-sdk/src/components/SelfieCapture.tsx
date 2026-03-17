@@ -1,13 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import "../styles/tokens.css";
 import styles from "./SelfieCapture.module.css";
 
 export interface SelfieCaptureProps {
   value?: string;
   onChange: (selfieBase64: string) => void;
+  className?: string;
 }
 
-export function SelfieCapture({ value = "", onChange }: SelfieCaptureProps) {
+export function SelfieCapture({ value = "", onChange, className }: SelfieCaptureProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -16,15 +17,15 @@ export function SelfieCapture({ value = "", onChange }: SelfieCaptureProps) {
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [error, setError] = useState("");
 
-  const stopCamera = () => {
+  const stopCamera = useCallback(() => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
     setIsCameraActive(false);
-  };
+  }, []);
 
-  const startCamera = async () => {
+  const startCamera =  async () => {
     if (!navigator.mediaDevices?.getUserMedia) {
       setError("Camera API is not supported in this browser.");
       return;
@@ -91,7 +92,7 @@ export function SelfieCapture({ value = "", onChange }: SelfieCaptureProps) {
   }, []);
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${className}`}>
       <div className={styles.frame}>
         {capturedSelfie ? (
           <img className={styles.preview} src={capturedSelfie} alt="Captured selfie preview" />

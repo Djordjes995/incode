@@ -1,73 +1,102 @@
-# React + TypeScript + Vite
+## Quick SDK usage
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+### Install
 
-Currently, two official plugins are available:
+```bash
+# with pnpm
+pnpm add @incode/identity-sdk
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+# or with npm
+npm install @incode/identity-sdk
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# or with yarn
+yarn add @incode/identity-sdk
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Imports
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```ts
+import "@incode/identity-sdk/dist/index.css";
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+import {
+  PhoneInput,
+  type PhoneInputProps,
+  AddressForm,
+  type AddressFormProps,
+  SelfieCapture,
+  type SelfieCaptureProps,
+  getIdentityData,
+  type IdentityInput,
+  type IdentityResult,
+  type IdentityAddress,
+} from "@incode/identity-sdk";
 ```
+
+### Minimal end‑to‑end example
+
+```tsx
+import { useState } from "react";
+import "@incode/identity-sdk/dist/index.css";
+import {
+  PhoneInput,
+  AddressForm,
+  SelfieCapture,
+  getIdentityData,
+  type IdentityInput,
+  type IdentityResult,
+  type IdentityAddress,
+} from "@incode/identity-sdk";
+
+export function IdentityFlowExample() {
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState<IdentityAddress | null>(null);
+  const [selfie, setSelfie] = useState("");
+  const [result, setResult] = useState<IdentityResult | null>(null);
+
+  const handleSubmit = () => {
+    if (!phone || !address || !selfie) return;
+
+    const input: IdentityInput = {
+      phone,
+      address,
+      selfieUrl: selfie,
+    };
+
+    const verification = getIdentityData(input);
+    setResult(verification);
+  };
+
+  return (
+    <div>
+      <PhoneInput onChange={setPhone} />
+
+      <AddressForm value={address ?? undefined} onChange={setAddress} />
+
+      <SelfieCapture onChange={setSelfie} />
+
+      <button
+        type="button"
+        onClick={handleSubmit}
+        disabled={!phone || !address || !selfie}
+      >
+        Verify identity
+      </button>
+
+      {result && <pre>{JSON.stringify(result, null, 2)}</pre>}
+    </div>
+  );
+}
+```
+
+### Component behavior
+
+- **`PhoneInput`**
+  - **Value** is managed internally; you receive the parsed value through `onChange`.
+  - **`onChange`** is called with the normalized E.164 phone string, or `""` when invalid.
+
+- **`AddressForm`**
+  - **`value`** is an optional initial `IdentityAddress`.
+  - **`onChange`** is called with a trimmed `IdentityAddress` when valid, or `null` while invalid/partial.
+
+- **`SelfieCapture`**
+  - **`onChange`** is called with base64 image data (e.g. `data:image/png;base64,...`) or `""` when retaken/cleared.

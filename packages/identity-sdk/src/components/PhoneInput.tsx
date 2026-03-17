@@ -13,9 +13,10 @@ const COUNTRY_OPTIONS: Array<{ code: CountryCode; label: string; dialCode: strin
 export interface PhoneInputProps {
   value?: string;
   onChange: (normalizedPhone: string) => void;
+  className?: string;
 }
 
-export function PhoneInput({ value = "", onChange }: PhoneInputProps) {
+export function PhoneInput({ value = "", onChange, className }: PhoneInputProps) {
   const selectId = useId();
   const inputId = useId();
   const [selectedCountry, setSelectedCountry] = useState(COUNTRY_OPTIONS[0]);
@@ -51,7 +52,7 @@ export function PhoneInput({ value = "", onChange }: PhoneInputProps) {
   };
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${className}`}>
       <div className={styles.field}>
         <label className={styles.label} htmlFor={selectId}>
           Country

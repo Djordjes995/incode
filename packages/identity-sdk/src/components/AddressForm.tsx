@@ -6,6 +6,7 @@ import styles from "./AddressForm.module.css";
 export interface AddressFormProps {
   value?: IdentityAddress;
   onChange: (address: IdentityAddress | null) => void;
+  className?: string;
 }
 
 const DEFAULT_ADDRESS: IdentityAddress = {
@@ -16,7 +17,7 @@ const DEFAULT_ADDRESS: IdentityAddress = {
   postalCode: "",
 };
 
-export function AddressForm({ value = DEFAULT_ADDRESS, onChange }: AddressFormProps) {
+export function AddressForm({ value = DEFAULT_ADDRESS, onChange, className }: AddressFormProps) {
   const streetId = useId();
   const cityId = useId();
   const stateId = useId();
@@ -66,7 +67,7 @@ export function AddressForm({ value = DEFAULT_ADDRESS, onChange }: AddressFormPr
   };
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${className}`}>
       <div className={styles.grid}>
         <div className={`${styles.field} ${styles.fullWidth}`}>
           <label className={styles.label} htmlFor={streetId}>
