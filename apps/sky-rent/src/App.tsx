@@ -132,6 +132,15 @@ function App() {
         <p className={styles.subtitle}>Identity verification demo with reusable SDK components.</p>
       </header>
 
+      <p className={styles.status}>Current step: {step}</p>
+
+      <div className={styles.actions}>
+        <button className={styles.button} onClick={goBack} disabled={step === 'shop'} type='button'>Back</button>
+        {step !== 'result' && step !== 'checkout' ? (
+          <button className={styles.primaryButton} onClick={goNext} disabled={!isCurrentStepValid} type='button'>Next</button>
+        ) : null}
+      </div>
+
       <section className={styles.panel}>
         {step === 'shop' ? (
           <ShopStep
@@ -211,14 +220,7 @@ function App() {
         ) : null}
       </section>
 
-      <p className={styles.status}>Current step: {step}</p>
 
-      <div className={styles.actions}>
-        <button className={styles.button} onClick={goBack} disabled={step === 'shop'} type='button'>Back</button>
-        {step !== 'result' && step !== 'checkout' ? (
-          <button className={styles.primaryButton} onClick={goNext} disabled={!isCurrentStepValid} type='button'>Next</button>
-        ) : null}
-      </div>
     </main>
   )
 }
