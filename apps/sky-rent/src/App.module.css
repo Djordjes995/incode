@@ -78,6 +78,8 @@
 }
 
 .button {
+  position: relative;
+  overflow: hidden;
   border: 1px solid var(--sr-color-border);
   border-radius: var(--sr-radius-md);
   padding: var(--sr-space-2) var(--sr-space-3);
@@ -86,13 +88,44 @@
   cursor: pointer;
 }
 
+.button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(0, 0, 0, 0.2) 0%, transparent 70%);
+  opacity: 0.6;
+  transform: scale(0);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.button:active:not(:disabled)::after {
+  animation: ripple 0.4s ease-out;
+}
+
+@keyframes ripple {
+  to {
+    opacity: 0;
+    transform: scale(2);
+  }
+}
+
 .button:focus-visible {
   outline: none;
   border-color: var(--sr-color-primary);
   box-shadow: var(--sr-shadow-focus);
 }
 
+.button[disabled],
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .primaryButton {
+  position: relative;
+  overflow: hidden;
   border: 1px solid var(--sr-color-primary);
   border-radius: var(--sr-radius-md);
   padding: var(--sr-space-2) var(--sr-space-3);
@@ -101,10 +134,43 @@
   cursor: pointer;
 }
 
+.primaryButton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
+  opacity: 0;
+  transform: scale(0.5);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.primaryButton:active:not(:disabled)::after {
+  animation: ripplePrimary 0.5s ease-out;
+}
+
+@keyframes ripplePrimary {
+  0% {
+    opacity: 1;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2);
+  }
+}
+
 .primaryButton:focus-visible {
   outline: none;
   border-color: var(--sr-color-primary);
   box-shadow: var(--sr-shadow-focus);
+}
+
+.primaryButton[disabled],
+.primaryButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .sectionTitle {

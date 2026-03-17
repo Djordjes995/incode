@@ -1,4 +1,5 @@
 import type { DroneItem } from './shopTypes'
+import appStyles from '../App.module.css'
 import styles from './DroneCard.module.css'
 
 interface DroneCardProps {
@@ -46,11 +47,11 @@ export function DroneCard({ drone, rentalDays, onDaysChange, onAddToCart }: Dron
       <div>
         <div className={styles.cardContent}>
           <h3 className={styles.itemName}>{drone.name}</h3>
-          <p className={styles.description}>{drone.description}</p>
           <p className={styles.itemMeta}>
             {droneMeta}
-            {' '} · ${drone.pricePerDay}/day
           </p>
+          <p className={styles.description}>{drone.description}</p>
+          <p className={styles.price}>${drone.pricePerDay}/day</p>
         </div>
       </div>
       <div className={styles.cardFooter}>
@@ -65,7 +66,7 @@ export function DroneCard({ drone, rentalDays, onDaysChange, onAddToCart }: Dron
           value={rentalDays}
           onChange={(event) => onDaysChange(event.target.value)}
         />
-        <button className={styles.button} onClick={onAddToCart} type='button'>Add to cart</button>
+        <button className={appStyles.primaryButton} onClick={onAddToCart} type='button'>Add to cart</button>
       </div>
     </article>
   )

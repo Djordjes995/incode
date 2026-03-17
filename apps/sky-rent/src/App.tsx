@@ -256,7 +256,6 @@ function App() {
           <OrderSummary
             items={selectedCartItems}
             total={cartTotal}
-            stepLabel={step}
           />
         ) : null}
       </div>

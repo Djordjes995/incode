@@ -4,7 +4,6 @@ import type { CartItem } from './shopTypes'
 interface OrderSummaryProps {
   items: CartItem[]
   total: number
-  stepLabel: string
 }
 
 const moneyFormatter = new Intl.NumberFormat('en-US', {
@@ -13,11 +12,9 @@ const moneyFormatter = new Intl.NumberFormat('en-US', {
   minimumFractionDigits: 2,
 })
 
-export function OrderSummary({ items, total, stepLabel }: OrderSummaryProps) {
+export function OrderSummary({ items, total }: OrderSummaryProps) {
   return (
     <aside className={styles.card} aria-label='Order summary'>
-      <p className={styles.eyebrow}>Current step</p>
-      <p className={styles.step}>{stepLabel}</p>
 
       <h2 className={styles.title}>Order summary</h2>
 

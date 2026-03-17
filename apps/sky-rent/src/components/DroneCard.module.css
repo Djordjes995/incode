@@ -49,12 +49,23 @@
 
 .itemMeta {
   margin: var(--sr-space-1) 0 0;
+  font-size: var(--sr-font-size-sm);
+  color: var(--sr-color-text-muted, #666);
+  line-height: 1.4;
+  font-weight: 500;
 }
 
 .description {
-  margin: var(--sr-space-1) 0 0;
+  margin: var(--sr-space-2) 0 0;
   font-size: var(--sr-font-size-sm);
   color: var(--sr-color-text-muted, #666);
+  line-height: 1.4;
+}
+
+.price {
+  margin: var(--sr-space-1) 0 0;
+  font-size: var(--sr-font-size-md);
+  color: var(--sr-color-text);
   line-height: 1.4;
 }
 
