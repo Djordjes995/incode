@@ -25,7 +25,7 @@ export function SelfieCapture({ value = "", onChange, className }: SelfieCapture
     setIsCameraActive(false);
   }, []);
 
-  const startCamera =  async () => {
+  const startCamera = async () => {
     if (!navigator.mediaDevices?.getUserMedia) {
       setError("Camera API is not supported in this browser.");
       return;
@@ -86,6 +86,12 @@ export function SelfieCapture({ value = "", onChange, className }: SelfieCapture
   };
 
   useEffect(() => {
+    if (isCameraActive && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+    }
+  }, [isCameraActive]);
+
+  useEffect(() => {
     return () => {
       stopCamera();
     };
@@ -96,33 +102,43 @@ export function SelfieCapture({ value = "", onChange, className }: SelfieCapture
       <div className={styles.frame}>
         {capturedSelfie ? (
           <img className={styles.preview} src={capturedSelfie} alt="Captured selfie preview" />
-        ) : (
+        ) : isCameraActive ? (
           <>
             <video ref={videoRef} className={styles.video} autoPlay playsInline muted />
-            {isCameraActive ? <div className={styles.guide} /> : null}
+            <div className={styles.guide} />
           </>
+        ) : (
+          <div className={styles.placeholder}>
+            <div className={styles.avatarIcon} aria-hidden="true">
+              <span className={styles.avatarHead} />
+              <span className={styles.avatarBody} />
+            </div>
+            <p className={styles.placeholderText}>Center your face and start camera</p>
+          </div>
         )}
+
+        <div className={styles.actions}>
+          {!isCameraActive && !capturedSelfie ? (
+            <button className={styles.button} type="button" onClick={startCamera}>
+              Start Camera
+            </button>
+          ) : null}
+
+          {isCameraActive ? (
+            <button className={styles.button} type="button" onClick={captureSelfie}>
+              Capture Selfie
+            </button>
+          ) : null}
+
+          {capturedSelfie ? (
+            <button className={styles.button} type="button" onClick={retakeSelfie}>
+              Retake
+            </button>
+          ) : null}
+        </div>
       </div>
 
-      <div className={styles.actions}>
-        {!isCameraActive && !capturedSelfie ? (
-          <button className={styles.button} type="button" onClick={startCamera}>
-            Start Camera
-          </button>
-        ) : null}
 
-        {isCameraActive ? (
-          <button className={styles.button} type="button" onClick={captureSelfie}>
-            Capture Selfie
-          </button>
-        ) : null}
-
-        {capturedSelfie ? (
-          <button className={styles.button} type="button" onClick={retakeSelfie}>
-            Retake
-          </button>
-        ) : null}
-      </div>
 
       {error ? (
         <p className={styles.error} role="alert">

@@ -10,7 +10,7 @@
   border: 1px solid var(--icv-color-border);
   border-radius: var(--icv-radius-md);
   overflow: hidden;
-  background: #0f172a;
+  background: linear-gradient(180deg, #e8ebf0 0%, #d8dde5 100%);
   min-height: 16rem;
 }
 
@@ -22,17 +22,79 @@
   display: block;
 }
 
+.preview {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.placeholder {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--icv-space-3);
+}
+
+.avatarIcon {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  display: grid;
+  place-items: center;
+  gap: 0.2rem;
+}
+
+.avatarHead {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(31, 41, 55, 0.65);
+  border-radius: 999px;
+}
+
+.avatarBody {
+  width: 1.55rem;
+  height: 0.95rem;
+  border: 2px solid rgba(31, 41, 55, 0.65);
+  border-top-left-radius: 999px;
+  border-top-right-radius: 999px;
+  border-bottom: 0;
+}
+
+.placeholderText {
+  margin: 0;
+  font-size: var(--icv-font-size-lg);
+  font-weight: var(--icv-font-weight-medium);
+}
+
 .guide {
   position: absolute;
-  inset: 12% 20%;
-  border: 2px dashed rgba(255, 255, 255, 0.8);
+  top: 12%;
+  left: 24%;
+  right: 24%;
+  bottom: 16%;
+  border: 2px solid rgba(255, 255, 255, 0.9);
   border-radius: 999px;
+  box-shadow:
+    0 0 0 1px rgba(15, 23, 42, 0.15),
+    inset 0 0 0 1px rgba(15, 23, 42, 0.12),
+    0 0 24px rgba(255, 255, 255, 0.25);
   pointer-events: none;
 }
 
 .actions {
   display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--icv-space-4);
   gap: var(--icv-space-3);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0) 0%, rgba(15, 23, 42, 0.32) 100%);
 }
 
 .button {
@@ -42,9 +104,10 @@
   color: var(--icv-color-text);
   padding: var(--icv-space-2) var(--icv-space-3);
   cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
 }
 
-.button:focus {
+.button:focus-visible {
   outline: none;
   border-color: var(--icv-color-focus);
   box-shadow: var(--icv-shadow-focus);
