@@ -1,0 +1,89 @@
+.wrapper {
+  display: grid;
+  gap: 16px;
+}
+
+.header {
+  display: grid;
+  gap: 6px;
+}
+
+.title {
+  margin: 0;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--sr-color-muted);
+}
+
+.content {
+  display: grid;
+  gap: 16px;
+}
+
+.grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(180px, 240px) 1fr;
+  align-items: start;
+}
+
+.image {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid var(--sr-color-border);
+}
+
+.details {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--sr-color-border);
+  border-radius: 12px;
+  background: var(--sr-color-surface);
+}
+
+.row {
+  display: grid;
+  gap: 4px;
+}
+
+.label {
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--sr-color-muted);
+}
+
+.success {
+  color: #1f8a39;
+  font-weight: 600;
+}
+
+.error {
+  color: #c63f2f;
+  font-weight: 600;
+}
+
+.retryButton {
+  width: fit-content;
+  border: 1px solid var(--sr-color-border);
+  border-radius: 10px;
+  background: var(--sr-color-surface);
+  padding: 10px 14px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.retryButton:hover {
+  background: var(--sr-color-bg);
+}
+
+@media (max-width: 720px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -3,6 +3,8 @@ import { droneInventory } from './data/droneInventory'
 import { ShopStep } from './components/ShopStep'
 import { OrderSummary } from './components/OrderSummary'
 import { StepLayout } from './components/StepLayout'
+import { ResultStep } from './components/ResultStep'
+import { CheckoutStep } from './components/CheckoutStep'
 import type { CargoDroneItem, CartItem, DroneItem, FilmingDroneItem } from './components/shopTypes'
 import {
   AddressForm,
@@ -139,7 +141,7 @@ function App() {
     0,
   )
 
-  const showSummary = step !== 'shop'
+  const showSummary = step !== 'shop' && step !== 'checkout'
   const showNextButton = step !== 'result' || result?.status === 'verified'
   const showBackButton = step !== 'checkout' && step !== 'shop'
 
@@ -227,107 +229,16 @@ function App() {
             )}
 
             {step === 'result' && result && (
-              <div className={styles.stepSection}>
-                <div className={styles.sectionHeader}>
-                  <h3 className={styles.sectionTitle}>Verification Result</h3>
-                  <p className={styles.sectionSubtitle}>
-                    {result.status === 'verified'
-                      ? 'Your identity has been verified. You may proceed to checkout.'
-                      : 'Verification failed. You can retry or abandon checkout.'}
-                  </p>
-                </div>
-                <div className={styles.sectionContent}>
-                  <div className={styles.resultGrid}>
-                    <img className={styles.imagePreview} src={result.selfieUrl} alt="Captured selfie" />
-                    <div className={styles.resultDetails}>
-                      <div className={styles.resultRow}>
-                        <span className={styles.resultLabel}>Phone</span>
-                        <span>{result.phone}</span>
-                      </div>
-                      <div className={styles.resultRow}>
-                        <span className={styles.resultLabel}>Address</span>
-                        <span>
-                          {result.address.street}, {result.address.city}, {result.address.state},{' '}
-                          {result.address.country} {result.address.postalCode}
-                        </span>
-                      </div>
-                      <div className={styles.resultRow}>
-                        <span className={styles.resultLabel}>Score</span>
-                        <span>{result.score}/100</span>
-                      </div>
-                      <div className={styles.resultRow}>
-                        <span className={styles.resultLabel}>Status</span>
-                        <span className={result.status === 'verified' ? styles.success : styles.error}>
-                          {result.status === 'verified' ? 'Verified' : 'Failed'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  {result.status === 'failed' && (
-                    <button className={styles.retryButton} onClick={retryVerification} type="button">
-                      Retry Verification
-                    </button>
-                  )}
-                </div>
-              </div>
+              <ResultStep result={result} onRetry={retryVerification} />
             )}
 
             {step === 'checkout' && result && (
-              <div className={styles.stepSection}>
-                <div className={styles.sectionHeader}>
-                  <h3 className={styles.sectionTitle}>Checkout</h3>
-                  <p className={styles.sectionSubtitle}>
-                    Review your order and complete the rental.
-                  </p>
-                </div>
-                <div className={styles.sectionContent}>
-                  <div className={styles.checkoutGrid}>
-                    <div className={styles.checkoutSection}>
-                      <h4 className={styles.checkoutHeading}>Cart</h4>
-                      {selectedCartItems.length > 0 ? (
-                        <ul className={styles.checkoutList}>
-                          {selectedCartItems.map((item) => (
-                            <li key={`${item.id}-checkout`} className={styles.checkoutItem}>
-                              <span>{item.name}</span>
-                              <span>{item.rentalDays} {item.rentalDays === 1 ? 'day' : 'days'}</span>
-                              <span className={styles.checkoutPrice}>
-                                ${item.pricePerDay * item.rentalDays}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : null}
-                      <div className={styles.checkoutTotal}>
-                        <span>Total</span>
-                        <strong>${cartTotal}</strong>
-                      </div>
-                    </div>
-
-                    <div className={styles.checkoutSection}>
-                      <h4 className={styles.checkoutHeading}>Verified Identity</h4>
-                      <div className={styles.resultRow}>
-                        <span className={styles.resultLabel}>Status</span>
-                        <span className={styles.success}>{result.status}</span>
-                      </div>
-                      <div className={styles.resultRow}>
-                        <span className={styles.resultLabel}>Phone</span>
-                        <span>{result.phone}</span>
-                      </div>
-                      <div className={styles.resultRow}>
-                        <span className={styles.resultLabel}>Address</span>
-                        <span>
-                          {result.address.street}, {result.address.city}, {result.address.state},{' '}
-                          {result.address.country} {result.address.postalCode}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {rentalCompleted && (
-                    <p className={styles.success}>Rental completed successfully!</p>
-                  )}
-                </div>
-              </div>
+              <CheckoutStep
+                result={result}
+                selectedCartItems={selectedCartItems}
+                cartTotal={cartTotal}
+                rentalCompleted={rentalCompleted}
+              />
             )}
           </StepLayout>
         </section>
