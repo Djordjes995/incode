@@ -8,8 +8,8 @@ interface ShopStepProps {
   cargoDrones: CargoDroneItem[]
   selectedCartItems: CartItem[]
   onAddDrone: (drone: DroneItem, rentalDays: number) => void
-  onRemoveCartItem: (index: number) => void
-  onUpdateCartItemDays: (index: number, rentalDays: number) => void
+  onRemoveCartItem: (id: number) => void
+  onUpdateCartItemDays: (id: number, rentalDays: number) => void
 }
 
 type CategoryFilter = 'all' | 'filming' | 'cargo'
@@ -79,8 +79,8 @@ export function ShopStep({
           <p className={styles.selectedCount}>Selected items: {selectedCartItems.length}</p>
           {selectedCartItems.length > 0 ? (
             <ul className={styles.cartList}>
-              {selectedCartItems.map((item, index) => (
-                <li key={`${item.id}-${index}`} className={styles.cartItem}>
+              {selectedCartItems.map((item) => (
+                <li key={item.id} className={styles.cartItem}>
                   <span className={styles.cartItemName}>{item.name}</span>
                   <label className={styles.daysControl}>
                     <span>Days</span>
@@ -91,7 +91,7 @@ export function ShopStep({
                       value={item.rentalDays}
                       onChange={(e) => {
                         const v = Number.parseInt(e.target.value, 10)
-                        if (Number.isFinite(v)) onUpdateCartItemDays(index, v)
+                        if (Number.isFinite(v)) onUpdateCartItemDays(item.id, v)
                       }}
                       aria-label={`Rental days for ${item.name}`}
                     />
@@ -100,7 +100,7 @@ export function ShopStep({
                   <button
                     type="button"
                     className={styles.removeButton}
-                    onClick={() => onRemoveCartItem(index)}
+                    onClick={() => onRemoveCartItem(item.id)}
                     aria-label={`Remove ${item.name} from cart`}
                   >
                     Remove

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { droneInventory } from './data/droneInventory'
 import { ShopStep } from './components/ShopStep'
 import { OrderSummary } from './components/OrderSummary'
+import { StepLayout } from './components/StepLayout'
 import type { CargoDroneItem, CartItem, DroneItem, FilmingDroneItem } from './components/shopTypes'
 import {
   AddressForm,
@@ -13,15 +14,32 @@ import {
 import styles from './App.module.css'
 
 type AppStep = 'shop' | 'selfie' | 'phone' | 'address' | 'result' | 'checkout'
-const appSteps: AppStep[] = ['shop', 'selfie', 'phone', 'address', 'result', 'checkout']
+
+const APP_STEPS: { key: AppStep; label: string }[] = [
+  { key: 'shop', label: 'Browse' },
+  { key: 'selfie', label: 'Selfie' },
+  { key: 'phone', label: 'Phone' },
+  { key: 'address', label: 'Address' },
+  { key: 'result', label: 'Result' },
+  { key: 'checkout', label: 'Checkout' },
+]
+
+const NEXT_LABELS: Record<AppStep, string> = {
+  shop: 'Continue to Verification',
+  selfie: 'Next',
+  phone: 'Next',
+  address: 'Verify Identity',
+  result: 'Proceed to Checkout',
+  checkout: 'Complete Rental',
+}
 
 const filmingDrones = droneInventory.filter(
   (drone): drone is FilmingDroneItem => drone.category === 'filming',
-);
+)
 const cargoDrones = droneInventory.filter(
   (drone): drone is CargoDroneItem => drone.category === 'cargo',
-);
-const MAX_RENTAL_DAYS = 30;
+)
+const MAX_RENTAL_DAYS = 30
 
 function App() {
   const [selfie, setSelfie] = useState('')
@@ -48,20 +66,22 @@ function App() {
     (step === 'selfie' && Boolean(selfie)) ||
     (step === 'phone' && Boolean(normalizedPhone)) ||
     (step === 'address' && Boolean(address)) ||
-    (step === 'result' && Boolean(result)) ||
+    (step === 'result' && result?.status === 'verified') ||
     step === 'checkout'
 
+  const stepKeys = APP_STEPS.map((s) => s.key)
+
   const goNext = () => {
-    const currentIndex = appSteps.indexOf(step)
-    const nextStep = appSteps[currentIndex + 1]
+    const currentIndex = stepKeys.indexOf(step)
+    const nextStep = stepKeys[currentIndex + 1]
     if (nextStep) {
       setStep(nextStep)
     }
   }
 
   const goBack = () => {
-    const currentIndex = appSteps.indexOf(step)
-    const previousStep = appSteps[currentIndex - 1]
+    const currentIndex = stepKeys.indexOf(step)
+    const previousStep = stepKeys[currentIndex - 1]
     if (previousStep) {
       setStep(previousStep)
     }
@@ -71,25 +91,18 @@ function App() {
     setSelfie('')
     setNormalizedPhone('')
     setAddress(null)
-    setRentalCompleted(false)
     setStep('selfie')
-  }
-
-  const proceedToCheckout = () => {
-    if (result?.status === 'verified') {
-      setStep('checkout')
-    }
   }
 
   const addDroneToCart = (drone: DroneItem, rentalDays: number) => {
     setSelectedCartItems((current) => {
-      const existingIndex = current.findIndex((item) => item.id === drone.id);
+      const existingIndex = current.findIndex((item) => item.id === drone.id)
       if (existingIndex >= 0) {
         return current.map((item, index) =>
           index === existingIndex
             ? { ...item, rentalDays: Math.min(MAX_RENTAL_DAYS, item.rentalDays + rentalDays) }
             : item,
-        );
+        )
       }
 
       return [
@@ -106,18 +119,18 @@ function App() {
             ? { loadCapacityKg: drone.loadCapacityKg }
             : { cameraQuality: drone.cameraQuality }),
         },
-      ];
+      ]
     })
   }
 
-  const removeCartItem = (index: number) => {
-    setSelectedCartItems((current) => current.filter((_, i) => i !== index))
+  const removeCartItem = (id: number) => {
+    setSelectedCartItems((current) => current.filter((item) => item.id !== id))
   }
 
-  const updateCartItemDays = (index: number, days: number) => {
+  const updateCartItemDays = (id: number, days: number) => {
     const safeDays = Math.min(MAX_RENTAL_DAYS, Math.max(1, days))
     setSelectedCartItems((current) =>
-      current.map((item, i) => (i === index ? { ...item, rentalDays: safeDays } : item)),
+      current.map((item) => (item.id === id ? { ...item, rentalDays: safeDays } : item)),
     )
   }
 
@@ -125,142 +138,203 @@ function App() {
     (total, item) => total + item.pricePerDay * item.rentalDays,
     0,
   )
+
   const showSummary = step !== 'shop'
-  const currentStepNumber = appSteps.indexOf(step) + 1
+  const showNextButton = step !== 'result' || result?.status === 'verified'
+  const showBackButton = step !== 'checkout'
+
+  const handleNext = () => {
+    if (step === 'checkout') {
+      setRentalCompleted(true)
+      return
+    }
+    goNext()
+  }
 
   return (
     <main className={styles.page}>
       <header className={styles.header}>
         <h1 className={styles.title}>SkyRent Drones</h1>
         <p className={styles.subtitle}>Identity verification demo with reusable SDK components.</p>
-        <p className={styles.progress}>Step {currentStepNumber} of {appSteps.length}</p>
       </header>
-
-      <div className={styles.actions}>
-        <button className={styles.button} onClick={goBack} disabled={step === 'shop'} type='button'>Back</button>
-        {step !== 'result' && step !== 'checkout' ? (
-          <button className={styles.primaryButton} onClick={goNext} disabled={!isCurrentStepValid} type='button'>Next</button>
-        ) : null}
-      </div>
 
       <div
         className={`${styles.contentLayout} ${!showSummary ? styles.contentLayoutSingle : ''}`}
       >
         <section className={styles.panel}>
-          {step === 'shop' ? (
-            <ShopStep
-              filmingDrones={filmingDrones}
-              cargoDrones={cargoDrones}
-              selectedCartItems={selectedCartItems}
-              onAddDrone={addDroneToCart}
-              onRemoveCartItem={removeCartItem}
-              onUpdateCartItemDays={updateCartItemDays}
-            />
-          ) : null}
-          {step === 'selfie' && (
-            <div className={styles.stepSection}>
-              <div className={styles.sectionHeader}>
-                <h3 className={styles.sectionTitle}>Selfie Capture</h3>
-                <p className={styles.sectionSubtitle}>
-                  Take a clear photo of your face for identity verification.
-                </p>
-              </div>
-              <div className={styles.sectionContent}>
-                <SelfieCapture onChange={setSelfie} value={selfie} />
-              </div>
-            </div>
-          )}
-          {step === 'phone' && (
-            <div className={styles.stepSection}>
-              <div className={styles.sectionHeader}>
-                <h3 className={styles.sectionTitle}>Phone Verification</h3>
-                <p className={styles.sectionSubtitle}>
-                  Enter your phone number so we can validate your contact details.
-                </p>
-              </div>
-              <div className={styles.sectionContent}>
-                <PhoneInput onChange={setNormalizedPhone} value={normalizedPhone} />
-              </div>
-            </div>
-          )}
-          {step === 'address' && (
-            <div className={styles.stepSection}>
-              <div className={styles.sectionHeader}>
-                <h3 className={styles.sectionTitle}>Address Verification</h3>
-                <p className={styles.sectionSubtitle}>
-                  Provide your current address to complete identity checks.
-                </p>
-              </div>
-              <div className={styles.sectionContent}>
-                <AddressForm onChange={setAddress} value={address ?? undefined} />
-              </div>
-            </div>
-          )}
+          <StepLayout
+            steps={APP_STEPS}
+            currentStepKey={step}
+            onBack={goBack}
+            onNext={handleNext}
+            nextLabel={NEXT_LABELS[step]}
+            nextDisabled={!isCurrentStepValid}
+            showBack={showBackButton}
+            showNext={showNextButton}
+          >
+            {step === 'shop' && (
+              <ShopStep
+                filmingDrones={filmingDrones}
+                cargoDrones={cargoDrones}
+                selectedCartItems={selectedCartItems}
+                onAddDrone={addDroneToCart}
+                onRemoveCartItem={removeCartItem}
+                onUpdateCartItemDays={updateCartItemDays}
+              />
+            )}
 
-          {step === 'result' && result ? (
-            <>
-              <img className={styles.imagePreview} src={result.selfieUrl} alt='selfie' />
-              <div>Phone: {result.phone}</div>
-              <div>
-                Address:
-                <div>
-                  Street: {result.address.street}<br />
-                  City: {result.address.city}<br />
-                  State: {result.address.state}<br />
-                  Country: {result.address.country}<br />
-                  Postal Code: {result.address.postalCode}<br />
+            {step === 'selfie' && (
+              <div className={styles.stepSection}>
+                <div className={styles.sectionHeader}>
+                  <h3 className={styles.sectionTitle}>Selfie Capture</h3>
+                  <p className={styles.sectionSubtitle}>
+                    Take a clear photo of your face for identity verification.
+                  </p>
+                </div>
+                <div className={styles.sectionContent}>
+                  <SelfieCapture onChange={setSelfie} value={selfie} />
                 </div>
               </div>
-              <p>Verification status: {result.status}</p>
-              <p>Verification score: {result.score}</p>
-              {result.status === 'failed' ? (
-                <>
-                  <p className={styles.error}>Verification failed. Please retry or stop checkout.</p>
-                  <button className={styles.button} onClick={retryVerification} type='button'>Retry verification</button>
-                </>
-              ) : (
-                <>
-                  <p className={styles.success}>Verification succeeded. You can proceed to checkout.</p>
-                  <button className={styles.primaryButton} onClick={proceedToCheckout} type='button'>Proceed to checkout</button>
-                </>
-              )}
-            </>
-          ) : null}
-          {step === 'checkout' && result ? (
-            <>
-              <h2>Checkout</h2>
-              <p>Cart items: {selectedCartItems.length}</p>
-              {selectedCartItems.length > 0 ? (
-                <ul>
-                  {selectedCartItems.map((item) => (
-                    <li key={`${item.id}-checkout`}>
-                      {item.name} x {item.rentalDays} day - ${item.pricePerDay * item.rentalDays}
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-              <p>Total: ${cartTotal}</p>
-              <p>Identity status: {result.status}</p>
-              <p>Phone: {result.phone}</p>
-              <p>
-                Address: {result.address.street}, {result.address.city}, {result.address.state},{' '}
-                {result.address.country}, {result.address.postalCode}
-              </p>
-              <button className={styles.primaryButton} onClick={() => setRentalCompleted(true)} type='button'>Complete Rental</button>
-              {rentalCompleted ? <p className={styles.success}>Rental completed successfully.</p> : null}
-            </>
-          ) : null}
+            )}
+
+            {step === 'phone' && (
+              <div className={styles.stepSection}>
+                <div className={styles.sectionHeader}>
+                  <h3 className={styles.sectionTitle}>Phone Verification</h3>
+                  <p className={styles.sectionSubtitle}>
+                    Enter your phone number so we can validate your contact details.
+                  </p>
+                </div>
+                <div className={styles.sectionContent}>
+                  <PhoneInput onChange={setNormalizedPhone} value={normalizedPhone} />
+                </div>
+              </div>
+            )}
+
+            {step === 'address' && (
+              <div className={styles.stepSection}>
+                <div className={styles.sectionHeader}>
+                  <h3 className={styles.sectionTitle}>Address Verification</h3>
+                  <p className={styles.sectionSubtitle}>
+                    Provide your current address to complete identity checks.
+                  </p>
+                </div>
+                <div className={styles.sectionContent}>
+                  <AddressForm onChange={setAddress} value={address ?? undefined} />
+                </div>
+              </div>
+            )}
+
+            {step === 'result' && result && (
+              <div className={styles.stepSection}>
+                <div className={styles.sectionHeader}>
+                  <h3 className={styles.sectionTitle}>Verification Result</h3>
+                  <p className={styles.sectionSubtitle}>
+                    {result.status === 'verified'
+                      ? 'Your identity has been verified. You may proceed to checkout.'
+                      : 'Verification failed. You can retry or abandon checkout.'}
+                  </p>
+                </div>
+                <div className={styles.sectionContent}>
+                  <div className={styles.resultGrid}>
+                    <img className={styles.imagePreview} src={result.selfieUrl} alt="Captured selfie" />
+                    <div className={styles.resultDetails}>
+                      <div className={styles.resultRow}>
+                        <span className={styles.resultLabel}>Phone</span>
+                        <span>{result.phone}</span>
+                      </div>
+                      <div className={styles.resultRow}>
+                        <span className={styles.resultLabel}>Address</span>
+                        <span>
+                          {result.address.street}, {result.address.city}, {result.address.state},{' '}
+                          {result.address.country} {result.address.postalCode}
+                        </span>
+                      </div>
+                      <div className={styles.resultRow}>
+                        <span className={styles.resultLabel}>Score</span>
+                        <span>{result.score}/100</span>
+                      </div>
+                      <div className={styles.resultRow}>
+                        <span className={styles.resultLabel}>Status</span>
+                        <span className={result.status === 'verified' ? styles.success : styles.error}>
+                          {result.status === 'verified' ? 'Verified' : 'Failed'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  {result.status === 'failed' && (
+                    <button className={styles.retryButton} onClick={retryVerification} type="button">
+                      Retry Verification
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {step === 'checkout' && result && (
+              <div className={styles.stepSection}>
+                <div className={styles.sectionHeader}>
+                  <h3 className={styles.sectionTitle}>Checkout</h3>
+                  <p className={styles.sectionSubtitle}>
+                    Review your order and complete the rental.
+                  </p>
+                </div>
+                <div className={styles.sectionContent}>
+                  <div className={styles.checkoutGrid}>
+                    <div className={styles.checkoutSection}>
+                      <h4 className={styles.checkoutHeading}>Cart</h4>
+                      {selectedCartItems.length > 0 ? (
+                        <ul className={styles.checkoutList}>
+                          {selectedCartItems.map((item) => (
+                            <li key={`${item.id}-checkout`} className={styles.checkoutItem}>
+                              <span>{item.name}</span>
+                              <span>{item.rentalDays} {item.rentalDays === 1 ? 'day' : 'days'}</span>
+                              <span className={styles.checkoutPrice}>
+                                ${item.pricePerDay * item.rentalDays}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                      <div className={styles.checkoutTotal}>
+                        <span>Total</span>
+                        <strong>${cartTotal}</strong>
+                      </div>
+                    </div>
+
+                    <div className={styles.checkoutSection}>
+                      <h4 className={styles.checkoutHeading}>Verified Identity</h4>
+                      <div className={styles.resultRow}>
+                        <span className={styles.resultLabel}>Status</span>
+                        <span className={styles.success}>{result.status}</span>
+                      </div>
+                      <div className={styles.resultRow}>
+                        <span className={styles.resultLabel}>Phone</span>
+                        <span>{result.phone}</span>
+                      </div>
+                      <div className={styles.resultRow}>
+                        <span className={styles.resultLabel}>Address</span>
+                        <span>
+                          {result.address.street}, {result.address.city}, {result.address.state},{' '}
+                          {result.address.country} {result.address.postalCode}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {rentalCompleted && (
+                    <p className={styles.success}>Rental completed successfully!</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </StepLayout>
         </section>
 
-        {showSummary ? (
-          <OrderSummary
-            items={selectedCartItems}
-            total={cartTotal}
-          />
-        ) : null}
+        {showSummary && (
+          <OrderSummary items={selectedCartItems} total={cartTotal} />
+        )}
       </div>
-
-
     </main>
   )
 }
