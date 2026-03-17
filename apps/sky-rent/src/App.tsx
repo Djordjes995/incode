@@ -141,7 +141,7 @@ function App() {
 
   const showSummary = step !== 'shop'
   const showNextButton = step !== 'result' || result?.status === 'verified'
-  const showBackButton = step !== 'checkout'
+  const showBackButton = step !== 'checkout' && step !== 'shop'
 
   const handleNext = () => {
     if (step === 'checkout') {
@@ -174,6 +174,7 @@ function App() {
           >
             {step === 'shop' && (
               <ShopStep
+                onGoNext={goNext}
                 filmingDrones={filmingDrones}
                 cargoDrones={cargoDrones}
                 selectedCartItems={selectedCartItems}

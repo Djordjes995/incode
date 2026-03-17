@@ -180,7 +180,6 @@
 
 .primaryButton:hover:not(:disabled) {
   filter: brightness(0.95);
-  transform: translateY(-1px);
 }
 
 .primaryButton[disabled],
