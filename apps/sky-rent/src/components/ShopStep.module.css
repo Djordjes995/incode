@@ -3,16 +3,24 @@
   gap: var(--sr-space-3);
 }
 
+.section h2 {
+  margin: 0;
+  text-align: left;
+  font-size: clamp(1.3rem, 2vw, 1.6rem);
+}
+
 .description {
   margin: 0;
   color: var(--sr-color-muted);
+  text-align: left;
+  max-width: 44rem;
 }
 
 .filterRow {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: var(--sr-space-2);
+  gap: var(--sr-space-3);
   flex-wrap: wrap;
 }
 
@@ -28,6 +36,10 @@
   align-items: stretch;
   gap: var(--sr-space-2);
   width: min(100%, 30rem);
+  border: 1px solid var(--sr-color-border);
+  border-radius: 0.75rem;
+  padding: var(--sr-space-3);
+  background: #fcfdff;
 }
 
 .selectedCount {
@@ -42,6 +54,7 @@
   padding: var(--sr-space-1) var(--sr-space-2);
   background: var(--sr-color-surface);
   cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
 }
 
 .filterButton[data-active='true'] {

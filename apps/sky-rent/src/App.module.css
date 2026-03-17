@@ -1,24 +1,29 @@
 .page {
-  max-width: 64rem;
+  max-width: 72rem;
   margin: 0 auto;
-  padding: var(--sr-space-4) var(--sr-space-3);
+  padding: clamp(var(--sr-space-4), 3vw, var(--sr-space-8)) var(--sr-space-3);
   display: grid;
-  gap: var(--sr-space-4);
+  gap: var(--sr-space-5);
 }
 
 .header {
   display: grid;
-  gap: var(--sr-space-1);
+  gap: var(--sr-space-2);
+  text-align: center;
+  justify-items: center;
 }
 
 .title {
   margin: 0;
-  font-size: 2rem;
+  font-size: clamp(2rem, 3vw, 2.5rem);
+  letter-spacing: -0.02em;
 }
 
 .subtitle {
   margin: 0;
   color: var(--sr-color-muted);
+  max-width: 42rem;
+  line-height: 1.5;
 }
 
 .progress {
@@ -30,17 +35,17 @@
 .panel {
   background: var(--sr-color-surface);
   border: 1px solid var(--sr-color-border);
-  border-radius: var(--sr-radius-md);
-  box-shadow: var(--sr-shadow-sm);
-  padding: var(--sr-space-4);
+  border-radius: 0.75rem;
+  box-shadow: var(--sr-shadow-md);
+  padding: clamp(var(--sr-space-4), 2vw, var(--sr-space-6));
   display: grid;
-  gap: var(--sr-space-3);
+  gap: var(--sr-space-4);
 }
 
 .contentLayout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 18rem;
-  gap: var(--sr-space-3);
+  gap: var(--sr-space-4);
   align-items: start;
 }
 
@@ -86,6 +91,7 @@
   background: var(--sr-color-surface);
   color: var(--sr-color-text);
   cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .button::after {
@@ -116,6 +122,11 @@
   box-shadow: var(--sr-shadow-focus);
 }
 
+.button:hover:not(:disabled) {
+  border-color: #c7d3e3;
+  transform: translateY(-1px);
+}
+
 .button[disabled],
 .button:disabled {
   opacity: 0.6;
@@ -132,6 +143,7 @@
   background: var(--sr-color-primary);
   color: #fff;
   cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
 }
 
 .primaryButton::after {
@@ -166,6 +178,11 @@
   box-shadow: var(--sr-shadow-focus);
 }
 
+.primaryButton:hover:not(:disabled) {
+  filter: brightness(0.95);
+  transform: translateY(-1px);
+}
+
 .primaryButton[disabled],
 .primaryButton:disabled {
   opacity: 0.6;
@@ -193,10 +210,12 @@
 .sectionHeader {
   display: grid;
   gap: var(--sr-space-1);
+  text-align: left;
+  justify-items: start;
 }
 
 .sectionContent {
-  margin-top: var(--sr-space-4);
+  margin-top: var(--sr-space-3);
   display: grid;
   gap: var(--sr-space-2);
 }
