@@ -2,18 +2,24 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import "../styles/tokens.css";
 import styles from "./SelfieCapture.module.css";
 
+export type SelfieCaptureChange = {
+  base64: string | null;
+  hasImage: boolean;
+  error?: string;
+};
+
 export interface SelfieCaptureProps {
-  value?: string;
-  onChange: (selfieBase64: string) => void;
+  defaultValue?: string;
+  onChange: (next: SelfieCaptureChange) => void;
   className?: string;
 }
 
-export function SelfieCapture({ value = "", onChange, className }: SelfieCaptureProps) {
+export function SelfieCapture({ defaultValue = "", onChange, className }: SelfieCaptureProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  const [capturedSelfie, setCapturedSelfie] = useState(value);
+  const [capturedSelfie, setCapturedSelfie] = useState(defaultValue);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [error, setError] = useState("");
 
@@ -27,7 +33,9 @@ export function SelfieCapture({ value = "", onChange, className }: SelfieCapture
 
   const startCamera = async () => {
     if (!navigator.mediaDevices?.getUserMedia) {
-      setError("Camera API is not supported in this browser.");
+      const message = "Camera API is not supported in this browser.";
+      setError(message);
+      onChange({ base64: capturedSelfie || null, hasImage: Boolean(capturedSelfie), error: message });
       return;
     }
 
@@ -44,8 +52,10 @@ export function SelfieCapture({ value = "", onChange, className }: SelfieCapture
       }
       setIsCameraActive(true);
     } catch {
-      setError("Unable to access camera. Check browser permissions.");
+      const message = "Unable to access camera. Check browser permissions.";
+      setError(message);
       setIsCameraActive(false);
+      onChange({ base64: capturedSelfie || null, hasImage: Boolean(capturedSelfie), error: message });
     }
   };
 
@@ -60,7 +70,9 @@ export function SelfieCapture({ value = "", onChange, className }: SelfieCapture
     const width = videoElement.videoWidth;
     const height = videoElement.videoHeight;
     if (!width || !height) {
-      setError("Camera stream not ready yet. Please try again.");
+      const message = "Camera stream not ready yet. Please try again.";
+      setError(message);
+      onChange({ base64: null, hasImage: false, error: message });
       return;
     }
 
@@ -68,20 +80,22 @@ export function SelfieCapture({ value = "", onChange, className }: SelfieCapture
     canvasElement.height = height;
     const context = canvasElement.getContext("2d");
     if (!context) {
-      setError("Could not initialize image capture.");
+      const message = "Could not initialize image capture.";
+      setError(message);
+      onChange({ base64: null, hasImage: false, error: message });
       return;
     }
 
     context.drawImage(videoElement, 0, 0, width, height);
     const base64Image = canvasElement.toDataURL("image/png");
     setCapturedSelfie(base64Image);
-    onChange(base64Image);
+    onChange({ base64: base64Image, hasImage: true });
     stopCamera();
   };
 
   const retakeSelfie = () => {
     setCapturedSelfie("");
-    onChange("");
+    onChange({ base64: null, hasImage: false });
     startCamera();
   };
 

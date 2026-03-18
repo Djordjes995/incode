@@ -3,9 +3,16 @@ import "../styles/tokens.css";
 import type { IdentityAddress } from "../types";
 import styles from "./AddressForm.module.css";
 
+export type AddressFormChange = {
+  value: IdentityAddress;
+  trimmed: IdentityAddress;
+  isValid: boolean;
+  errors: Partial<Record<keyof IdentityAddress, string>>;
+};
+
 export interface AddressFormProps {
-  value?: IdentityAddress;
-  onChange: (address: IdentityAddress | null) => void;
+  defaultValue?: IdentityAddress;
+  onChange: (next: AddressFormChange) => void;
   className?: string;
 }
 
@@ -17,129 +24,114 @@ const DEFAULT_ADDRESS: IdentityAddress = {
   postalCode: "",
 };
 
-export function AddressForm({ value = DEFAULT_ADDRESS, onChange, className }: AddressFormProps) {
+type FieldErrors = Partial<Record<keyof IdentityAddress, string>>;
+
+function validate(nextAddress: IdentityAddress): FieldErrors {
+  const errors: FieldErrors = {};
+  const requiredFields: (keyof IdentityAddress)[] = ["street", "city", "state", "country"];
+  for (const field of requiredFields) {
+    if (!nextAddress[field].trim()) {
+      errors[field] = "This field is required.";
+    }
+  }
+  if (nextAddress.postalCode.trim().length > 0 && nextAddress.postalCode.trim().length < 3) {
+    errors.postalCode = "Postal code must be at least 3 characters.";
+  } else if (!nextAddress.postalCode.trim()) {
+    errors.postalCode = "This field is required.";
+  }
+  return errors;
+}
+
+function isValid(errors: FieldErrors): boolean {
+  return Object.keys(errors).length === 0;
+}
+
+export function AddressForm({ defaultValue, onChange, className }: AddressFormProps) {
   const streetId = useId();
   const cityId = useId();
   const stateId = useId();
   const countryId = useId();
   const postalCodeId = useId();
 
-  const [address, setAddress] = useState<IdentityAddress>(value);
-  const [error, setError] = useState("");
+  const [address, setAddress] = useState<IdentityAddress>(defaultValue ?? DEFAULT_ADDRESS);
+  const [touched, setTouched] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
-  const validateAndEmit = (nextAddress: IdentityAddress) => {
-    if (
-      !nextAddress.street.trim() ||
-      !nextAddress.city.trim() ||
-      !nextAddress.state.trim() ||
-      !nextAddress.country.trim() ||
-      !nextAddress.postalCode.trim()
-    ) {
-      setError("All address fields are required.");
-      onChange(null);
-      return;
-    }
+  const trimmedAddress = (nextAddress: IdentityAddress): IdentityAddress => ({
+    street: nextAddress.street.trim(),
+    city: nextAddress.city.trim(),
+    state: nextAddress.state.trim(),
+    country: nextAddress.country.trim(),
+    postalCode: nextAddress.postalCode.trim(),
+  });
 
-    // Keep validation intentionally basic for assignment scope.
-    if (nextAddress.postalCode.trim().length < 3) {
-      setError("Postal code must be at least 3 characters.");
-      onChange(null);
-      return;
-    }
-
-    setError("");
+  const emitChange = (nextAddress: IdentityAddress, errors: FieldErrors) => {
+    const trimmed = trimmedAddress(nextAddress);
+    const valid = isValid(errors);
     onChange({
-      street: nextAddress.street.trim(),
-      city: nextAddress.city.trim(),
-      state: nextAddress.state.trim(),
-      country: nextAddress.country.trim(),
-      postalCode: nextAddress.postalCode.trim(),
+      value: nextAddress,
+      trimmed,
+      isValid: valid,
+      errors,
     });
   };
 
-  const updateField = (field: keyof IdentityAddress, fieldValue: string) => {
-    const nextAddress = {
-      ...address,
-      [field]: fieldValue,
-    };
-    setAddress(nextAddress);
-    validateAndEmit(nextAddress);
+  const runValidation = (nextAddress: IdentityAddress, showErrors: boolean) => {
+    const errors = validate(nextAddress);
+    if (showErrors) {
+      setFieldErrors(errors);
+    }
+    emitChange(nextAddress, errors);
   };
+
+  const updateField = (field: keyof IdentityAddress, fieldValue: string) => {
+    const nextAddress = { ...address, [field]: fieldValue };
+    setAddress(nextAddress);
+    runValidation(nextAddress, touched);
+  };
+
+  const handleBlur = () => {
+    setTouched(true);
+    runValidation(address, true);
+  };
+
+  const fields: { key: keyof IdentityAddress; id: string; label: string; placeholder: string }[] = [
+    { key: "street", id: streetId, label: "Street Address", placeholder: "123 Main Street" },
+    { key: "city", id: cityId, label: "City", placeholder: "San Francisco" },
+    { key: "state", id: stateId, label: "State/Province", placeholder: "California" },
+    { key: "country", id: countryId, label: "Country", placeholder: "United States" },
+    { key: "postalCode", id: postalCodeId, label: "Postal/Zip Code", placeholder: "94102" },
+  ];
 
   return (
     <div className={`${styles.container} ${className}`}>
       <div className={styles.grid}>
-        <div className={`${styles.field} ${styles.fullWidth}`}>
-          <label className={styles.label} htmlFor={streetId}>
-            Street Address
-          </label>
-          <input
-            className={styles.control}
-            id={streetId}
-            value={address.street}
-            onChange={(event) => updateField("street", event.target.value)}
-            placeholder="123 Main Street"
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor={cityId}>
-            City
-          </label>
-          <input
-            className={styles.control}
-            id={cityId}
-            value={address.city}
-            onChange={(event) => updateField("city", event.target.value)}
-            placeholder="San Francisco"
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor={stateId}>
-            State/Province
-          </label>
-          <input
-            className={styles.control}
-            id={stateId}
-            value={address.state}
-            onChange={(event) => updateField("state", event.target.value)}
-            placeholder="California"
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor={countryId}>
-            Country
-          </label>
-          <input
-            className={styles.control}
-            id={countryId}
-            value={address.country}
-            onChange={(event) => updateField("country", event.target.value)}
-            placeholder="United States"
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor={postalCodeId}>
-            Postal/Zip Code
-          </label>
-          <input
-            className={styles.control}
-            id={postalCodeId}
-            value={address.postalCode}
-            onChange={(event) => updateField("postalCode", event.target.value)}
-            placeholder="94102"
-          />
-        </div>
+        {fields.map(({ key, id, label, placeholder }) => (
+          <div
+            key={key}
+            className={`${styles.field} ${key === "street" ? styles.fullWidth : ""}`}
+          >
+            <label className={styles.label} htmlFor={id}>
+              {label}
+            </label>
+            <input
+              className={`${styles.control} ${fieldErrors[key] ? styles.controlError : ""}`}
+              id={id}
+              value={address[key]}
+              onChange={(e) => updateField(key, e.target.value)}
+              onBlur={handleBlur}
+              placeholder={placeholder}
+              aria-invalid={!!fieldErrors[key]}
+              aria-describedby={fieldErrors[key] ? `${id}-error` : undefined}
+            />
+            {fieldErrors[key] ? (
+              <p id={`${id}-error`} className={styles.error} role="alert">
+                {fieldErrors[key]}
+              </p>
+            ) : null}
+          </div>
+        ))}
       </div>
-
-      {error ? (
-        <p className={styles.error} role="alert">
-          {error}
-        </p>
-      ) : null}
     </div>
   );
 }

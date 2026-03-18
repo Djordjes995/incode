@@ -21,10 +21,13 @@ import "@incode/identity-sdk/dist/index.css";
 import {
   PhoneInput,
   type PhoneInputProps,
+  type PhoneInputChange,
   AddressForm,
   type AddressFormProps,
+  type AddressFormChange,
   SelfieCapture,
   type SelfieCaptureProps,
+  type SelfieCaptureChange,
   getIdentityData,
   type IdentityInput,
   type IdentityResult,
@@ -68,11 +71,13 @@ export function IdentityFlowExample() {
 
   return (
     <div>
-      <PhoneInput onChange={setPhone} />
+      <PhoneInput onChange={(next: PhoneInputChange) => setPhone(next.normalized ?? "")} />
 
-      <AddressForm value={address ?? undefined} onChange={setAddress} />
+      <AddressForm
+        onChange={(next: AddressFormChange) => setAddress(next.isValid ? next.trimmed : null)}
+      />
 
-      <SelfieCapture onChange={setSelfie} />
+      <SelfieCapture onChange={(next: SelfieCaptureChange) => setSelfie(next.base64 ?? "")} />
 
       <button
         type="button"

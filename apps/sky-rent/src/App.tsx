@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { droneInventory } from './data/droneInventory'
 import { ShopStep } from './components/ShopStep'
 import { OrderSummary } from './components/OrderSummary'
@@ -12,6 +12,7 @@ import {
   SelfieCapture,
   getIdentityData,
   type IdentityAddress,
+  type IdentityResult,
 } from '@incode/identity-sdk'
 import styles from './App.module.css'
 
@@ -50,18 +51,8 @@ function App() {
   const [selectedCartItems, setSelectedCartItems] = useState<CartItem[]>([])
   const [step, setStep] = useState<AppStep>('shop')
   const [rentalCompleted, setRentalCompleted] = useState(false)
-
-  const result = useMemo(() => {
-    if (!selfie || !normalizedPhone || !address) {
-      return null
-    }
-
-    return getIdentityData({
-      selfieUrl: selfie,
-      phone: normalizedPhone,
-      address,
-    })
-  }, [address, normalizedPhone, selfie])
+  const [verificationAttempt, setVerificationAttempt] = useState(0)
+  const [result, setResult] = useState<IdentityResult | null>(null)
 
   const isCurrentStepValid =
     (step === 'shop' && selectedCartItems.length > 0) ||
@@ -93,6 +84,8 @@ function App() {
     setSelfie('')
     setNormalizedPhone('')
     setAddress(null)
+    setResult(null)
+    setVerificationAttempt((v) => v + 1)
     setStep('selfie')
   }
 
@@ -150,6 +143,17 @@ function App() {
       setRentalCompleted(true)
       return
     }
+    if (step === 'address') {
+      if (!selfie || !normalizedPhone || !address) return
+      const verification = getIdentityData({
+        selfieUrl: selfie,
+        phone: normalizedPhone,
+        address,
+      })
+      setResult(verification)
+      setStep('result')
+      return
+    }
     goNext()
   }
 
@@ -195,7 +199,10 @@ function App() {
                   </p>
                 </div>
                 <div className={styles.sectionContent}>
-                  <SelfieCapture onChange={setSelfie} value={selfie} />
+                  <SelfieCapture
+                    key={`selfie-${verificationAttempt}`}
+                    onChange={(next) => setSelfie(next.base64 ?? '')}
+                  />
                 </div>
               </div>
             )}
@@ -209,7 +216,10 @@ function App() {
                   </p>
                 </div>
                 <div className={styles.sectionContent}>
-                  <PhoneInput onChange={setNormalizedPhone} value={normalizedPhone} />
+                  <PhoneInput
+                    key={`phone-${verificationAttempt}`}
+                    onChange={(next) => setNormalizedPhone(next.normalized ?? '')}
+                  />
                 </div>
               </div>
             )}
@@ -223,7 +233,10 @@ function App() {
                   </p>
                 </div>
                 <div className={styles.sectionContent}>
-                  <AddressForm onChange={setAddress} value={address ?? undefined} />
+                  <AddressForm
+                    key={`address-${verificationAttempt}`}
+                    onChange={(next) => setAddress(next.isValid ? next.trimmed : null)}
+                  />
                 </div>
               </div>
             )}

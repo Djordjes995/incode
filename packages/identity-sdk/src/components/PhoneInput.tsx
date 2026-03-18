@@ -11,44 +11,73 @@ const COUNTRY_OPTIONS: Array<{ code: CountryCode; label: string; dialCode: strin
   { code: "MX", label: "Mexico (+52)", dialCode: "+52" },
 ];
 
+export type PhoneInputChange = {
+  display: string;
+  normalized: string | null;
+  isValid: boolean;
+  country: CountryCode;
+};
+
 export interface PhoneInputProps {
-  value?: string;
-  onChange: (normalizedPhone: string) => void;
+  defaultValue?: string;
+  defaultCountry?: CountryCode;
+  onChange: (next: PhoneInputChange) => void;
   className?: string;
 }
 
-export function PhoneInput({ value = "", onChange, className }: PhoneInputProps) {
+const MAX_E164_DIGITS = 15;
+const EARLY_VALIDATE_DIGITS = 6;
+
+export function PhoneInput({
+  defaultValue = "",
+  defaultCountry,
+  onChange,
+  className,
+}: PhoneInputProps) {
   const selectId = useId();
   const inputId = useId();
-  const [selectedCountry, setSelectedCountry] = useState(COUNTRY_OPTIONS[0]);
-  const [localNumber, setLocalNumber] = useState(value);
+  const initialCountry =
+    (defaultCountry && COUNTRY_OPTIONS.find((o) => o.code === defaultCountry)) ?? COUNTRY_OPTIONS[0];
+  const [selectedCountry, setSelectedCountry] = useState(initialCountry);
+  const [localNumber, setLocalNumber] = useState(defaultValue);
   const [error, setError] = useState("");
-  const lastEmittedRef = useRef("");
+  const lastEmittedRef = useRef<PhoneInputChange | null>(null);
 
-  const validate = (number: string, country: CountryCode): string => {
-    const digits = number.replace(/\D/g, "");
-    if (!digits) return "";
+  const getChange = (display: string, country: CountryCode): PhoneInputChange => {
+    const digits = display.replace(/\D/g, "");
+    if (!digits) {
+      return { display, normalized: null, isValid: false, country };
+    }
 
-    const parsed = parsePhoneNumberFromString(digits, country);
-    if (!parsed || !parsed.isValid()) return "Enter a valid phone number.";
+    const parsed = parsePhoneNumberFromString(display, country);
+    const isValid = Boolean(parsed?.isValid());
+    return {
+      display,
+      normalized: isValid ? (parsed!.number as string) : null,
+      isValid,
+      country,
+    };
+  };
 
+  const validate = (display: string, country: CountryCode): string => {
+    const next = getChange(display, country);
+    if (!next.display.replace(/\D/g, "")) return "";
+    if (!next.isValid) return "Enter a valid phone number.";
     return "";
   };
 
-  const emitValue = (number: string, country: CountryCode) => {
-    const digits = number.replace(/\D/g, "");
-    if (!digits) {
-      if (lastEmittedRef.current !== "") {
-        lastEmittedRef.current = "";
-        onChange("");
-      }
-      return;
-    }
-    const parsed = parsePhoneNumberFromString(digits, country);
-    const normalized = parsed?.isValid() ? (parsed.number as string) : "";
-    if (normalized !== lastEmittedRef.current) {
-      lastEmittedRef.current = normalized;
-      onChange(normalized);
+  const emitValue = (display: string, country: CountryCode) => {
+    const next = getChange(display, country);
+    const last = lastEmittedRef.current;
+    if (
+      !last ||
+      last.display !== next.display ||
+      last.normalized !== next.normalized ||
+      last.isValid !== next.isValid ||
+      last.country !== next.country
+    ) {
+      lastEmittedRef.current = next;
+      onChange(next);
     }
   };
 
@@ -92,10 +121,15 @@ export function PhoneInput({ value = "", onChange, className }: PhoneInputProps)
             const next = e.target.value;
             setLocalNumber(next);
             const digits = next.replace(/\D/g, "");
-            if (digits.length > 15) {
+            if (digits.length > MAX_E164_DIGITS) {
               setError("Phone number is too long.");
-            } else if (error) {
-              setError("");
+            } else {
+              const nextChange = getChange(next, selectedCountry.code);
+              if (digits.length >= EARLY_VALIDATE_DIGITS && !nextChange.isValid) {
+                setError("Enter a valid phone number.");
+              } else if (error) {
+                setError("");
+              }
             }
             emitValue(next, selectedCountry.code);
           }}

@@ -42,6 +42,15 @@
   box-shadow: var(--icv-shadow-focus);
 }
 
+.controlError {
+  border-color: var(--icv-color-error);
+}
+
+.controlError:focus {
+  border-color: var(--icv-color-error);
+  box-shadow: 0 0 0 1px var(--icv-color-error);
+}
+
 .error {
   margin: 0;
   font-size: var(--icv-font-size-sm);

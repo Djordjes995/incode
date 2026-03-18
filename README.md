@@ -59,18 +59,17 @@ pnpm lint
 
 ### SkyRent Demo App
 
-- [ ] Step 1: Browse/select drones + rental duration + cart
-- [ ] Step 2: Identity verification flow
-- [ ] Step 3: Verification result screen + gating
-- [ ] Step 4: Checkout flow (only when verified)
+- [x] Step 1: Browse/select drones + rental duration + cart
+- [x] Step 2: Identity verification flow
+- [x] Step 3: Verification result screen + gating
+- [x] Step 4: Checkout flow (only when verified)
 
 ## Current Status
 
-Milestone 3 complete: all required SDK components are bootstrapped.
+All required SDK components and the full demo flow are implemented end-to-end.
 
-- `SelfieCapture` starter flow is implemented (camera access, capture, preview, retake, basic errors).
-- `PhoneInput` and `AddressForm` are integrated with basic validation.
-- Demo app now composes all three SDK components before generating verification results.
+- Demo app implements the required step flow and gates checkout on successful verification.
+- SDK exports typed components plus `getIdentityData()` for generating a verification result.
 
 ## Milestones Log
 
@@ -83,4 +82,6 @@ Milestone 3 complete: all required SDK components are bootstrapped.
 - Prioritizing robust SDK boundaries and clear types first.
 - UI polish and advanced styling are intentionally deferred until core functionality is complete.
 - SDK follows a headless/composable model: host app controls step orchestration and checkout gating.
+- SDK input components are intentionally **uncontrolled** (`defaultValue` + rich `onChange` payloads) to avoid cursor-jump issues and formatting conflicts (especially for phone input).
+- Verification is generated on an explicit submit action (not on every keystroke) so randomized scores/status are stable and predictable for the user.
 - Engineering decision log: `docs/engineering-decisions.md`
