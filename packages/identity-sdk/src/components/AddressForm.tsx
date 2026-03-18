@@ -25,6 +25,7 @@ const DEFAULT_ADDRESS: IdentityAddress = {
 };
 
 type FieldErrors = Partial<Record<keyof IdentityAddress, string>>;
+type TouchedFields = { [K in keyof IdentityAddress]?: boolean };
 
 function validate(nextAddress: IdentityAddress): FieldErrors {
   const errors: FieldErrors = {};
@@ -54,8 +55,8 @@ export function AddressForm({ defaultValue, onChange, className }: AddressFormPr
   const postalCodeId = useId();
 
   const [address, setAddress] = useState<IdentityAddress>(defaultValue ?? DEFAULT_ADDRESS);
-  const [touched, setTouched] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [touchedFields, setTouchedFields] = useState<TouchedFields>({});
 
   const trimmedAddress = (nextAddress: IdentityAddress): IdentityAddress => ({
     street: nextAddress.street.trim(),
@@ -76,23 +77,29 @@ export function AddressForm({ defaultValue, onChange, className }: AddressFormPr
     });
   };
 
-  const runValidation = (nextAddress: IdentityAddress, showErrors: boolean) => {
-    const errors = validate(nextAddress);
-    if (showErrors) {
-      setFieldErrors(errors);
+  const runValidation = (
+    nextAddress: IdentityAddress,
+    nextTouchedFields: TouchedFields,
+  ) => {
+    const allErrors = validate(nextAddress);
+
+    // Only show errors for fields the user has interacted with; still emit overall validity
+    // based on the full-form validation.
+    const nextDisplayErrors: FieldErrors = {};
+    for (const key of Object.keys(nextTouchedFields) as (keyof IdentityAddress)[]) {
+      if (nextTouchedFields[key] && allErrors[key]) {
+        nextDisplayErrors[key] = allErrors[key];
+      }
     }
-    emitChange(nextAddress, errors);
+
+    setFieldErrors(nextDisplayErrors);
+    emitChange(nextAddress, allErrors);
   };
 
   const updateField = (field: keyof IdentityAddress, fieldValue: string) => {
     const nextAddress = { ...address, [field]: fieldValue };
     setAddress(nextAddress);
-    runValidation(nextAddress, touched);
-  };
-
-  const handleBlur = () => {
-    setTouched(true);
-    runValidation(address, true);
+    runValidation(nextAddress, touchedFields);
   };
 
   const fields: { key: keyof IdentityAddress; id: string; label: string; placeholder: string }[] = [
@@ -119,7 +126,13 @@ export function AddressForm({ defaultValue, onChange, className }: AddressFormPr
               id={id}
               value={address[key]}
               onChange={(e) => updateField(key, e.target.value)}
-              onBlur={handleBlur}
+              onBlur={(e) => {
+                const fieldValue = e.target.value;
+                const nextAddress = { ...address, [key]: fieldValue };
+                const nextTouched = { ...touchedFields, [key]: true };
+                setTouchedFields(nextTouched);
+                runValidation(nextAddress, nextTouched);
+              }}
               placeholder={placeholder}
               aria-invalid={!!fieldErrors[key]}
               aria-describedby={fieldErrors[key] ? `${id}-error` : undefined}
