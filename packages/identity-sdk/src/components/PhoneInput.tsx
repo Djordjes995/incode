@@ -1,10 +1,11 @@
-import { useId, useState } from "react";
+import { useId, useState, useRef } from "react";
 import { parsePhoneNumberFromString, type CountryCode } from "libphonenumber-js";
 import "../styles/tokens.css";
 import styles from "./PhoneInput.module.css";
 
 const COUNTRY_OPTIONS: Array<{ code: CountryCode; label: string; dialCode: string }> = [
   { code: "RS", label: "Serbia (+381)", dialCode: "+381" },
+  { code: "ME", label: "Montenegro (+382)", dialCode: "+382" },
   { code: "US", label: "United States (+1)", dialCode: "+1" },
   { code: "CA", label: "Canada (+1)", dialCode: "+1" },
   { code: "MX", label: "Mexico (+52)", dialCode: "+52" },
@@ -22,37 +23,37 @@ export function PhoneInput({ value = "", onChange, className }: PhoneInputProps)
   const [selectedCountry, setSelectedCountry] = useState(COUNTRY_OPTIONS[0]);
   const [localNumber, setLocalNumber] = useState(value);
   const [error, setError] = useState("");
+  const lastEmittedRef = useRef("");
 
-  const validateAndEmit = (numberValue: string, dialCode: string) => {
-    const digitsOnly = numberValue.replace(/\D/g, "");
+  const validate = (number: string, country: CountryCode): string => {
+    const digits = number.replace(/\D/g, "");
+    if (!digits) return "";
 
-    if (!digitsOnly) {
-      setError("");
-      onChange("");
+    const parsed = parsePhoneNumberFromString(digits, country);
+    if (!parsed || !parsed.isValid()) return "Enter a valid phone number.";
+
+    return "";
+  };
+
+  const emitValue = (number: string, country: CountryCode) => {
+    const digits = number.replace(/\D/g, "");
+    if (!digits) {
+      if (lastEmittedRef.current !== "") {
+        lastEmittedRef.current = "";
+        onChange("");
+      }
       return;
     }
-
-    // Basic validation before library-based phone parsing.
-    if (digitsOnly.length < 7 || digitsOnly.length > 15) {
-      setError("Enter a valid phone number length.");
-      onChange("");
-      return;
+    const parsed = parsePhoneNumberFromString(digits, country);
+    const normalized = parsed?.isValid() ? (parsed.number as string) : "";
+    if (normalized !== lastEmittedRef.current) {
+      lastEmittedRef.current = normalized;
+      onChange(normalized);
     }
-
-    const parsed = parsePhoneNumberFromString(`${dialCode}${digitsOnly}`);
-
-    if (!parsed || !parsed.isValid()) {
-      setError("Invalid phone number format.");
-      onChange("");
-      return;
-    }
-
-    setError("");
-    onChange(parsed.number);
   };
 
   return (
-    <div className={`${styles.container} ${className}`}>
+    <div className={`${styles.container} ${className ?? ""}`}>
       <div className={styles.field}>
         <label className={styles.label} htmlFor={selectId}>
           Country
@@ -61,11 +62,12 @@ export function PhoneInput({ value = "", onChange, className }: PhoneInputProps)
           className={styles.control}
           id={selectId}
           value={selectedCountry.code}
-          onChange={(event) => {
-            const next = COUNTRY_OPTIONS.find((option) => option.code === event.target.value);
+          onChange={(e) => {
+            const next = COUNTRY_OPTIONS.find((o) => o.code === e.target.value);
             if (next) {
               setSelectedCountry(next);
-              validateAndEmit(localNumber, next.dialCode);
+              setError(validate(localNumber, next.code));
+              emitValue(localNumber, next.code);
             }
           }}
         >
@@ -82,16 +84,27 @@ export function PhoneInput({ value = "", onChange, className }: PhoneInputProps)
           Phone Number
         </label>
         <input
-          className={styles.control}
+          className={`${styles.control} ${error ? styles.controlError : ""}`}
           id={inputId}
           type="tel"
           value={localNumber}
-          onChange={(event) => {
-            const nextValue = event.target.value;
-            setLocalNumber(nextValue);
-            validateAndEmit(nextValue, selectedCountry.dialCode);
+          onChange={(e) => {
+            const next = e.target.value;
+            setLocalNumber(next);
+            const digits = next.replace(/\D/g, "");
+            if (digits.length > 15) {
+              setError("Phone number is too long.");
+            } else if (error) {
+              setError("");
+            }
+            emitValue(next, selectedCountry.code);
           }}
-          placeholder="4155552671"
+          onBlur={() => {
+            const err = validate(localNumber, selectedCountry.code);
+            setError(err);
+            emitValue(localNumber, selectedCountry.code);
+          }}
+          placeholder="612 345 678"
         />
       </div>
 
