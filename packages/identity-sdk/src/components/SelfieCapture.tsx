@@ -112,7 +112,7 @@ export function SelfieCapture({ defaultValue = "", onChange, className }: Selfie
   }, []);
 
   return (
-    <div className={`${styles.container} ${className}`}>
+    <div className={`${styles.container} ${className ?? ""}`}>
       <div className={styles.frame}>
         {capturedSelfie ? (
           <img className={styles.preview} src={capturedSelfie} alt="Captured selfie preview" />

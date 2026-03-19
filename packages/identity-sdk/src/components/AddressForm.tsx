@@ -111,7 +111,7 @@ export function AddressForm({ defaultValue, onChange, className }: AddressFormPr
   ];
 
   return (
-    <div className={`${styles.container} ${className}`}>
+    <div className={`${styles.container} ${className ?? ""}`}>
       <div className={styles.grid}>
         {fields.map(({ key, id, label, placeholder }) => (
           <div
