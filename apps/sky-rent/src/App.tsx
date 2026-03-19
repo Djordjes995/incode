@@ -46,6 +46,7 @@ const MAX_RENTAL_DAYS = 30
 
 function App() {
   const [selfie, setSelfie] = useState('')
+  const [phoneDisplay, setPhoneDisplay] = useState('')
   const [normalizedPhone, setNormalizedPhone] = useState('')
   const [address, setAddress] = useState<IdentityAddress | null>(null)
   const [selectedCartItems, setSelectedCartItems] = useState<CartItem[]>([])
@@ -82,11 +83,24 @@ function App() {
 
   const retryVerification = () => {
     setSelfie('')
+    setPhoneDisplay('')
     setNormalizedPhone('')
     setAddress(null)
     setResult(null)
     setVerificationAttempt((v) => v + 1)
     setStep('selfie')
+  }
+
+  const resetFlow = () => {
+    setSelfie('')
+    setPhoneDisplay('')
+    setNormalizedPhone('')
+    setAddress(null)
+    setSelectedCartItems([])
+    setResult(null)
+    setRentalCompleted(false)
+    setVerificationAttempt((v) => v + 1)
+    setStep('shop')
   }
 
   const addDroneToCart = (drone: DroneItem, rentalDays: number) => {
@@ -137,9 +151,14 @@ function App() {
   const showSummary = step !== 'shop' && step !== 'checkout'
   const showNextButton = step !== 'result' || result?.status === 'verified'
   const showBackButton = step !== 'checkout' && step !== 'shop'
+  const nextLabel = step === 'checkout' && rentalCompleted ? 'Start New Rental' : NEXT_LABELS[step]
 
   const handleNext = () => {
     if (step === 'checkout') {
+      if (rentalCompleted) {
+        resetFlow()
+        return
+      }
       setRentalCompleted(true)
       return
     }
@@ -173,7 +192,7 @@ function App() {
             currentStepKey={step}
             onBack={goBack}
             onNext={handleNext}
-            nextLabel={NEXT_LABELS[step]}
+            nextLabel={nextLabel}
             nextDisabled={!isCurrentStepValid}
             showBack={showBackButton}
             showNext={showNextButton}
@@ -202,6 +221,7 @@ function App() {
                   <SelfieCapture
                     key={`selfie-${verificationAttempt}`}
                     onChange={(next) => setSelfie(next.base64 ?? '')}
+                    defaultValue={selfie}
                   />
                 </div>
               </div>
@@ -218,7 +238,11 @@ function App() {
                 <div className={styles.sectionContent}>
                   <PhoneInput
                     key={`phone-${verificationAttempt}`}
-                    onChange={(next) => setNormalizedPhone(next.normalized ?? '')}
+                    onChange={(next) => {
+                      setPhoneDisplay(next.display)
+                      setNormalizedPhone(next.normalized ?? '')
+                    }}
+                    defaultValue={phoneDisplay}
                   />
                 </div>
               </div>
@@ -236,6 +260,7 @@ function App() {
                   <AddressForm
                     key={`address-${verificationAttempt}`}
                     onChange={(next) => setAddress(next.isValid ? next.trimmed : null)}
+                    defaultValue={address ?? undefined}
                   />
                 </div>
               </div>
