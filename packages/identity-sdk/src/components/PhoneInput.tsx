@@ -4,11 +4,26 @@ import "../styles/tokens.css";
 import styles from "./PhoneInput.module.css";
 
 const COUNTRY_OPTIONS: Array<{ code: CountryCode; label: string; dialCode: string }> = [
-  { code: "RS", label: "Serbia (+381)", dialCode: "+381" },
-  { code: "ME", label: "Montenegro (+382)", dialCode: "+382" },
   { code: "US", label: "United States (+1)", dialCode: "+1" },
   { code: "CA", label: "Canada (+1)", dialCode: "+1" },
+  { code: "GB", label: "United Kingdom (+44)", dialCode: "+44" },
+  { code: "AU", label: "Australia (+61)", dialCode: "+61" },
+  { code: "DE", label: "Germany (+49)", dialCode: "+49" },
+  { code: "FR", label: "France (+33)", dialCode: "+33" },
+  { code: "ES", label: "Spain (+34)", dialCode: "+34" },
+  { code: "IT", label: "Italy (+39)", dialCode: "+39" },
+  { code: "PT", label: "Portugal (+351)", dialCode: "+351" },
+  { code: "NL", label: "Netherlands (+31)", dialCode: "+31" },
+  { code: "PL", label: "Poland (+48)", dialCode: "+48" },
+  { code: "BR", label: "Brazil (+55)", dialCode: "+55" },
   { code: "MX", label: "Mexico (+52)", dialCode: "+52" },
+  { code: "AR", label: "Argentina (+54)", dialCode: "+54" },
+  { code: "CO", label: "Colombia (+57)", dialCode: "+57" },
+  { code: "IN", label: "India (+91)", dialCode: "+91" },
+  { code: "JP", label: "Japan (+81)", dialCode: "+81" },
+  { code: "CN", label: "China (+86)", dialCode: "+86" },
+  { code: "RS", label: "Serbia (+381)", dialCode: "+381" },
+  { code: "ME", label: "Montenegro (+382)", dialCode: "+382" },
 ];
 
 export type PhoneInputChange = {
