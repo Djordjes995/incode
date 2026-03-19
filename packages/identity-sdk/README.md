@@ -51,16 +51,17 @@ import {
 } from "@incode/identity-sdk";
 
 export function IdentityFlowExample() {
-  const [phone, setPhone] = useState("");
+  const [phoneDisplay, setPhoneDisplay] = useState("");
+  const [phoneNormalized, setPhoneNormalized] = useState("");
   const [address, setAddress] = useState<IdentityAddress | null>(null);
   const [selfie, setSelfie] = useState("");
   const [result, setResult] = useState<IdentityResult | null>(null);
 
   const handleSubmit = () => {
-    if (!phone || !address || !selfie) return;
+    if (!phoneNormalized || !address || !selfie) return;
 
     const input: IdentityInput = {
-      phone,
+      phone: phoneNormalized,
       address,
       selfieUrl: selfie,
     };
@@ -71,7 +72,13 @@ export function IdentityFlowExample() {
 
   return (
     <div>
-      <PhoneInput onChange={(next: PhoneInputChange) => setPhone(next.normalized ?? "")} />
+      <PhoneInput
+        defaultValue={phoneDisplay}
+        onChange={(next: PhoneInputChange) => {
+          setPhoneDisplay(next.display);
+          setPhoneNormalized(next.normalized ?? "");
+        }}
+      />
 
       <AddressForm
         onChange={(next: AddressFormChange) => setAddress(next.isValid ? next.trimmed : null)}
@@ -82,7 +89,7 @@ export function IdentityFlowExample() {
       <button
         type="button"
         onClick={handleSubmit}
-        disabled={!phone || !address || !selfie}
+        disabled={!phoneNormalized || !address || !selfie}
       >
         Verify identity
       </button>
@@ -96,12 +103,20 @@ export function IdentityFlowExample() {
 ### Component behavior
 
 - **`PhoneInput`**
-  - **Value** is managed internally; you receive the parsed value through `onChange`.
-  - **`onChange`** is called with the normalized E.164 phone string, or `""` when invalid.
+  - Uncontrolled input with optional **`defaultValue`** for initial display value.
+  - **`onChange`** receives `{ display, normalized, isValid, country }`.
+  - Use `normalized` for verification/back-end payloads; keep `display` for user-facing UX.
 
 - **`AddressForm`**
-  - **`value`** is an optional initial `IdentityAddress`.
-  - **`onChange`** is called with a trimmed `IdentityAddress` when valid, or `null` while invalid/partial.
+  - Uncontrolled form with optional **`defaultValue`**.
+  - **`onChange`** receives `{ value, trimmed, isValid, errors }`.
+  - Use `trimmed` when `isValid` is `true`.
 
 - **`SelfieCapture`**
-  - **`onChange`** is called with base64 image data (e.g. `data:image/png;base64,...`) or `""` when retaken/cleared.
+  - Uncontrolled capture with optional **`defaultValue`**.
+  - **`onChange`** receives `{ base64, hasImage, error? }`.
+
+### Resetting uncontrolled components
+
+- The SDK inputs are intentionally uncontrolled to avoid cursor-jump formatting issues.
+- To force a full reset, remount the component (for example by changing a React `key`) and pass an empty `defaultValue`.

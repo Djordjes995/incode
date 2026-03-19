@@ -70,3 +70,38 @@ Tradeoff:
 Mitigation:
 - Clear integration examples and typed contracts reduce wiring mistakes.
 - Future optional wrapper can provide a prebuilt wizard for teams that prefer low-code integration.
+
+## 6) PhoneInput Country List Scope
+
+Decision:
+- Ship a curated list of ~20 countries covering the most common regions rather than the full ~250-country dataset.
+
+Alternatives considered:
+- Pulling all supported countries from `libphonenumber-js` (already installed) and adding a searchable dropdown.
+
+Why this decision:
+- A searchable custom dropdown requires meaningful additional work: custom dropdown component, keyboard navigation, ARIA attributes (`aria-expanded`, `aria-listbox`), and filter state — well beyond the scope of this assignment.
+- The curated list covers the realistic demo and reviewer use cases.
+- `libphonenumber-js` validates any country correctly; adding more entries to the list is a one-line change per country.
+
+Future option:
+- Accept an optional `countries` prop to let the host app override the list.
+- Replace the native `<select>` with a combobox for full-list UX.
+
+## 7) Test Scope
+
+Decision:
+- Unit tests cover pure business logic only: `generateVerificationScore` and `getIdentityData`.
+
+Alternatives considered:
+- Component tests via Vitest + jsdom + React Testing Library.
+- End-to-end tests via Playwright or Cypress.
+
+Why this decision:
+- The scoring distribution (30% fail / 70% pass) and the verified/failed status gating are the only pieces of logic with testable business rules directly derived from the spec. These are the tests that would catch a real regression.
+- Component tests in this context would primarily test that React renders correctly, not the SDK's business logic. The setup cost (jsdom, mocking `getUserMedia` for `SelfieCapture`, etc.) is high relative to the value.
+- E2E tests require a running server, CI configuration, and browser automation setup — out of scope for an assignment deliverable.
+
+Future option:
+- Add React Testing Library tests for form validation behavior in `AddressForm` and `PhoneInput`.
+- Add Playwright smoke tests for the full SkyRent user flow.
