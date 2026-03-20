@@ -36,6 +36,8 @@ I shipped a curated list of ~20 countries rather than exposing all ~250 that `li
 
 The curated list covers common regions and everything the demo needs. `libphonenumber-js` already validates any country correctly, so extending the list is a one-liner per entry. A natural next step would be accepting a `countries` prop so host apps can override it.
 
+On validation: the current implementation checks E.164 max length (15 digits) and delegates format validation to `libphonenumber-js`, which handles per-country number length rules internally. I didn't reimplement country-specific length checks on top of it — `libphonenumber-js` already knows that a US number is 10 digits while a German mobile is 11, so `parsed.isValid()` catches those cases. The one tradeoff is that error feedback is generic ("Enter a valid phone number") rather than country-specific ("US numbers must be 10 digits"), but that felt like the right level of detail for this scope.
+
 ## 7) Test scope
 
 I wrote unit tests for the two pieces of pure business logic: `generateVerificationScore` and `getIdentityData`. These are the functions with actual spec-derived rules (the 30/70 split, the ≥50 threshold for "verified") — the tests that would catch a real regression.
@@ -53,3 +55,4 @@ A few things I'd add with more time:
 - **Cart feedback** — right now adding a drone to the cart is silent. A snackbar or a brief animation on the cart count would make the interaction feel more responsive and confirm the action to the user.
 - **Field and spacing refinement** — the form layouts work but could use another pass to tighten up spacing, alignment, and visual rhythm across steps.
 - **SDK style overrides** — the SDK components bring their own styles, which keeps them self-contained, but in a real integration you'd want the verification steps to feel like part of the app rather than an embedded widget. The SDK exposes a `className` prop on each component for this reason — a production integration would use it to override tokens and match the host app's design system.
+
