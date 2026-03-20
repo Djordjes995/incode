@@ -137,11 +137,9 @@ export function AddressForm({ defaultValue, onChange, className }: AddressFormPr
               aria-invalid={!!fieldErrors[key]}
               aria-describedby={fieldErrors[key] ? `${id}-error` : undefined}
             />
-            {fieldErrors[key] ? (
-              <p id={`${id}-error`} className={styles.error} role="alert">
-                {fieldErrors[key]}
-              </p>
-            ) : null}
+            <p id={`${id}-error`} className={styles.error} role="alert">
+              {fieldErrors[key] ?? "\u00A0"}
+            </p>
           </div>
         ))}
       </div>

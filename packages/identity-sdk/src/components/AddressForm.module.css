@@ -7,13 +7,13 @@
 
 .grid {
   display: grid;
-  gap: var(--icv-space-3);
+  gap: 0 var(--icv-space-3);
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .field {
-  display: grid;
-  gap: var(--icv-space-1);
+  display: flex;
+  flex-direction: column;
 }
 
 .fullWidth {
@@ -24,6 +24,7 @@
   font-size: var(--icv-font-size-md);
   font-weight: var(--icv-font-weight-semibold);
   color: var(--icv-color-text-muted);
+  margin-bottom: var(--icv-space-2);
 }
 
 .control {
@@ -52,7 +53,7 @@
 }
 
 .error {
-  margin: 0;
+  margin: var(--icv-space-1) 0;
   font-size: var(--icv-font-size-sm);
   color: var(--icv-color-error);
 }

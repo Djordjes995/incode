@@ -13,6 +13,7 @@ import {
   getIdentityData,
   type IdentityAddress,
   type IdentityResult,
+  type PhoneInputChange,
 } from '@incode/identity-sdk'
 import styles from './App.module.css'
 
@@ -48,6 +49,7 @@ function App() {
   const [selfie, setSelfie] = useState('')
   const [phoneDisplay, setPhoneDisplay] = useState('')
   const [normalizedPhone, setNormalizedPhone] = useState('')
+  const [phoneCountry, setPhoneCountry] = useState<PhoneInputChange['country'] | undefined>(undefined)
   const [address, setAddress] = useState<IdentityAddress | null>(null)
   const [selectedCartItems, setSelectedCartItems] = useState<CartItem[]>([])
   const [step, setStep] = useState<AppStep>('shop')
@@ -241,8 +243,10 @@ function App() {
                     onChange={(next) => {
                       setPhoneDisplay(next.display)
                       setNormalizedPhone(next.normalized ?? '')
+                      setPhoneCountry(next.country)
                     }}
                     defaultValue={phoneDisplay}
+                    defaultCountry={phoneCountry}
                   />
                 </div>
               </div>

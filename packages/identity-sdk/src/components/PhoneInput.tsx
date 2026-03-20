@@ -132,6 +132,8 @@ export function PhoneInput({
           id={inputId}
           type="tel"
           value={localNumber}
+          aria-invalid={!!error}
+          aria-describedby={error ? `${inputId}-error` : undefined}
           onChange={(e) => {
             const next = e.target.value;
             setLocalNumber(next);
@@ -155,13 +157,10 @@ export function PhoneInput({
           }}
           placeholder="612 345 678"
         />
-      </div>
-
-      {error ? (
-        <p className={styles.error} role="alert">
-          {error}
+        <p id={`${inputId}-error`} className={styles.error} role="alert">
+          {error || "\u00A0"}
         </p>
-      ) : null}
+      </div>
     </div>
   );
 }
