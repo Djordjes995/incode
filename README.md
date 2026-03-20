@@ -43,6 +43,7 @@ pnpm dev:app
 pnpm build
 pnpm typecheck
 pnpm lint
+pnpm test
 ```
 
 ## Assignment Progress
@@ -79,8 +80,6 @@ All required SDK components and the full demo flow are implemented end-to-end.
 
 ## Notes / Tradeoffs
 
-- Prioritizing robust SDK boundaries and clear types first.
-- UI polish and advanced styling are intentionally deferred until core functionality is complete.
 - SDK follows a headless/composable model: host app controls step orchestration and checkout gating.
 - SDK input components are intentionally **uncontrolled** (`defaultValue` + rich `onChange` payloads) to avoid cursor-jump issues and formatting conflicts (especially for phone input).
 - Verification is generated on an explicit submit action (not on every keystroke) so randomized scores/status are stable and predictable for the user.

@@ -45,6 +45,10 @@
   min-width: 14rem;
 }
 
+.selectedCartTrigger:hover {
+  background: var(--sr-color-bg);
+}
+
 .selectedCartTrigger:focus-visible {
   outline: none;
   border-color: var(--sr-color-primary);

@@ -1,107 +1,55 @@
-# Engineering Decisions and Tradeoffs
+# Engineering Decisions
 
-This document captures intentional tradeoffs made during implementation so reviewers can understand the rationale behind design choices.
+A few notes on decisions I made while building this, mostly to give context on tradeoffs rather than leaving them as unexplained choices.
 
-## 1) SDK Style Isolation Strategy
+## 1) Style isolation
 
-Decision:
-- Use prefixed SDK class names (e.g. `icv-*`) and scoped component styles.
+I went with CSS Modules and a scoped class prefix rather than Shadow DOM. Shadow DOM gives you bulletproof style isolation, but it makes theming and overrides significantly more painful for host apps — you lose the ability to easily customize anything from outside. For this assignment, CSS Modules with a unique prefix is a clean middle ground: styles don't bleed out, and host apps can still override things if they need to. Not 100% conflict-proof in every edge case, but it keeps integration simple and debuggable.
 
-Alternatives considered:
-- Shadow DOM for strict style encapsulation.
+If strict isolation ever became a hard requirement, switching to Shadow DOM is a contained change.
 
-Why this decision:
-- Keeps host-app integration straightforward.
-- Avoids extra complexity around theming, overrides, and debugging.
-- Matches assignment scope where fast, clean execution is prioritized.
+## 2) Monorepo dev flow
 
-Known caveat:
-- Not mathematically bulletproof against every host CSS conflict.
+I linked the SDK as a workspace package so the demo app always runs against the live source. This means no manual rebuilds while iterating — the feedback loop stays fast. I still run `pnpm build` before any distribution-level check to make sure the compiled output is valid, but day-to-day the source link is much more ergonomic.
 
-Mitigation:
-- Unique class prefix, no global resets, shallow selectors, and CSS variables for theming.
+## 3) Types first, then components
 
-Future option:
-- Introduce Shadow DOM mode if strict isolation becomes a hard requirement.
+I defined the SDK's TypeScript contracts (`IdentityInput`, `IdentityResult`, etc.) before writing any component code. SDK consumers depend on a stable API surface, so locking that down first meant the demo app integration didn't need to change every time I touched an internal implementation detail.
 
-## 2) SDK Development Flow
+## 4) Headless SDK
 
-Decision:
-- Use workspace source linking for fast iteration, then run package builds for distribution validation.
+The SDK exposes individual components — `SelfieCapture`, `PhoneInput`, `AddressForm` — and a `getIdentityData` function, but it doesn't own the step flow or orchestration. That lives in the host app (SkyRent).
 
-Why this decision:
-- Faster local feedback while preserving confidence that packaged output works.
+The reason is flexibility. Different products will want different UX flows around identity capture — some linear, some in a modal, some with different step ordering. If the SDK baked in a fixed wizard, it would work fine for one use case and be annoying to work around for everything else. Keeping the SDK headless means each component is independently droppable into whatever flow the host needs.
 
-## 3) API Design Approach
+The tradeoff is slightly more wiring on the host side, but clear typed contracts keep that manageable. If a team wanted a low-code option, a prebuilt `IdentityWizard` wrapper on top of these primitives would be straightforward to add later.
 
-Decision:
-- Implement minimal typed contracts first, then build UI components against those contracts.
+## 5) Uncontrolled inputs
 
-Why this decision:
-- SDK consumers depend on stable API contracts.
-- Reduces integration churn between SDK and demo app.
+The SDK components use `defaultValue` + `onChange` rather than being fully controlled. This was a deliberate call, especially for `PhoneInput` — if you make a phone input fully controlled, React re-renders on every keystroke and you end up fighting cursor-jump issues with any formatting logic. Uncontrolled inputs sidestep that entirely. The `onChange` payload is rich enough (`display`, `normalized`, `isValid`) that host apps get everything they need without managing internal input state themselves.
 
-## 4) Current Scope Control
+To reset a component, you remount it via React's `key` prop — which is idiomatic React and keeps the SDK's internal state model simple.
 
-Decision:
-- Prioritize required assignment features first, defer non-essential polish.
+## 6) PhoneInput country list
 
-Why this decision:
-- Ensures all mandatory flows are complete and testable before aesthetic enhancements.
+I shipped a curated list of ~20 countries rather than exposing all ~250 that `libphonenumber-js` supports. Supporting all countries isn't just a data problem — it means building a searchable combobox with keyboard navigation, ARIA attributes, and filter state. That's a non-trivial component on its own and well outside the scope of this assignment.
 
-## 5) SDK Orchestration Model (Headless)
+The curated list covers common regions and everything the demo needs. `libphonenumber-js` already validates any country correctly, so extending the list is a one-liner per entry. A natural next step would be accepting a `countries` prop so host apps can override it.
 
-Decision:
-- Keep the SDK headless/composable: expose `SelfieCapture`, `PhoneInput`, `AddressForm`, and `getIdentityData`, while orchestration stays in the host app.
+## 7) Test scope
 
-Why this decision:
-- Maximizes integration flexibility across host apps with different UX flows.
-- Makes each SDK component independently reusable and testable.
-- Aligns with assignment intent: demonstrate SDK design plus host-app integration.
+I wrote unit tests for the two pieces of pure business logic: `generateVerificationScore` and `getIdentityData`. These are the functions with actual spec-derived rules (the 30/70 split, the ≥50 threshold for "verified") — the tests that would catch a real regression.
 
-How it behaves:
-- SDK components own capture and validation for their own data domain.
-- Host app owns step flow, navigation, retry rules, and checkout gating.
-- `getIdentityData` consumes collected values and returns score + status.
+I skipped component tests and E2E for this submission. Component tests here would mostly be asserting that React renders inputs and buttons, not testing any meaningful logic. The setup cost for `SelfieCapture` alone (jsdom, mocking `getUserMedia`) is significant relative to what you'd actually be testing. E2E tests need a running server and browser automation — reasonable for a production project, out of scope for an assignment.
 
-Tradeoff:
-- Integration cost is slightly higher because host apps must wire step sequencing.
+If this were a production SDK, the next testing layer would be React Testing Library tests for the form validation behavior in `AddressForm` and `PhoneInput`, and Playwright smoke tests for the SkyRent flow end-to-end.
 
-Mitigation:
-- Clear integration examples and typed contracts reduce wiring mistakes.
-- Future optional wrapper can provide a prebuilt wizard for teams that prefer low-code integration.
+## 8) Styling scope in the demo app
 
-## 6) PhoneInput Country List Scope
+The demo app is styled well enough to demonstrate the flow clearly, but I intentionally didn't go deep on UI polish — that felt like the wrong place to spend time on an assignment focused on SDK design.
 
-Decision:
-- Ship a curated list of ~20 countries covering the most common regions rather than the full ~250-country dataset.
+A few things I'd add with more time:
 
-Alternatives considered:
-- Pulling all supported countries from `libphonenumber-js` (already installed) and adding a searchable dropdown.
-
-Why this decision:
-- A searchable custom dropdown requires meaningful additional work: custom dropdown component, keyboard navigation, ARIA attributes (`aria-expanded`, `aria-listbox`), and filter state — well beyond the scope of this assignment.
-- The curated list covers the realistic demo and reviewer use cases.
-- `libphonenumber-js` validates any country correctly; adding more entries to the list is a one-line change per country.
-
-Future option:
-- Accept an optional `countries` prop to let the host app override the list.
-- Replace the native `<select>` with a combobox for full-list UX.
-
-## 7) Test Scope
-
-Decision:
-- Unit tests cover pure business logic only: `generateVerificationScore` and `getIdentityData`.
-
-Alternatives considered:
-- Component tests via Vitest + jsdom + React Testing Library.
-- End-to-end tests via Playwright or Cypress.
-
-Why this decision:
-- The scoring distribution (30% fail / 70% pass) and the verified/failed status gating are the only pieces of logic with testable business rules directly derived from the spec. These are the tests that would catch a real regression.
-- Component tests in this context would primarily test that React renders correctly, not the SDK's business logic. The setup cost (jsdom, mocking `getUserMedia` for `SelfieCapture`, etc.) is high relative to the value.
-- E2E tests require a running server, CI configuration, and browser automation setup — out of scope for an assignment deliverable.
-
-Future option:
-- Add React Testing Library tests for form validation behavior in `AddressForm` and `PhoneInput`.
-- Add Playwright smoke tests for the full SkyRent user flow.
+- **Cart feedback** — right now adding a drone to the cart is silent. A snackbar or a brief animation on the cart count would make the interaction feel more responsive and confirm the action to the user.
+- **Field and spacing refinement** — the form layouts work but could use another pass to tighten up spacing, alignment, and visual rhythm across steps.
+- **SDK style overrides** — the SDK components bring their own styles, which keeps them self-contained, but in a real integration you'd want the verification steps to feel like part of the app rather than an embedded widget. The SDK exposes a `className` prop on each component for this reason — a production integration would use it to override tokens and match the host app's design system.
